@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+	xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>Credit-Suisse WM</title>
@@ -35,34 +35,50 @@
 				</div>
 
 			</div>
-			<br><br>
+			<br> <br>
 			<p class="admin-message-text text-center" th:utext="${adminMessage}"></p>
-			<h1>Order Book List</h1>
-			<table border="2" width="70%" cellpadding="2">
-				<tr>
-					<th>Order Book Id</th>
-					<th>Order Book Name</th>
-					<th>Status of Order Book</th>
-					<th>Execution Status</th>
-					<th>Created By</th>
-					<th>Created ON</th>
-					<th>Edit</th>
-					<th>Delete</th>
-				</tr>
+			<div class="centered">
+				<table border="2" width="70%" cellpadding="2">
+					<tr>
+						<th>Order Book Id</th>
+						<th>Order Book Name</th>
+						<th>Status of Order Book</th>
+						<th>Instrument</th>
+						<th>Execution Status</th>
+						<th>Created By</th>
+						<th>Created ON</th>
+						<th>Delete</th>
+						<th>Open/Close</th>
+						<th>Order Book Statistics</th>
+					</tr>
 
-				<tr th:each="orderBook : ${orderBooks}">
-					<td th:text="${orderBook.orderBookId}"/>
-					<td th:text="${orderBook.orderBookName}"/>
-					<td th:text="${orderBook.orderBookStatus.statusValue}"/>
-					<td th:text="${orderBook.executionStatus}"/>
-					<td th:text="${orderBook.createdBy}"/>
-					<td th:text="${orderBook.createdOn}"/>
-					<td ><a th:href="@{'/orderBookEdit/' + ${orderBook.orderBookId}}">Edit</a> </td>
-					<td ><a th:href="@{'/orderBookDelete/' + ${orderBook.orderBookId}}">Delete</a> </td>
-				</tr>
+					<tr th:each="orderBook : ${orderBooks}">
+						<td th:text="${orderBook.orderBookId}" />
+						<td th:text="${orderBook.orderBookName}" />
+						<td th:text="${orderBook?.instrument.instrumentName}"></td>
+						<td th:text="${orderBook.orderBookStatus}" />
+						<td th:text="${orderBook.executionStatus}" />
+						<td th:text="${orderBook.createdBy}" />
+						<td th:text="${orderBook.createdOn}" />
+						<td><a
+							th:href="@{'/orderBookEdit/' + ${orderBook.orderBookId}}">Edit</a>
+						</td>
+						<td><a
+							th:href="@{'/orderBookClose/' + ${orderBook.orderBookId}}"
+							th:if="${orderBook.orderBookStatus.toString()  == 'OPEN'}">Close</a>
+							<a
+							th:href="@{'/orderBookOpen/' + ${orderBook.orderBookId}}"
+							th:if="${orderBook.orderBookStatus.toString()  == 'CLOSED'}">Open</a>
+						</td>
+						<td>
+							<a th:href="@{'/getBookStats/'+ ${orderBook.orderBookId}}">OrderBook Statistics </a>
+						</td>
+						
+					</tr>
 
-			</table>
-			<br /> <a href="/createOrderBook">Create New Order Book</a>
+				</table>
+				<br /> <a href="/createOrderBook">Create New Order Book</a>
+			</div>
 		</div>
 
 

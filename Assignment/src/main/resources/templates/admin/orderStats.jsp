@@ -69,7 +69,13 @@
 
 			<br> <br>
 			<button>
-				<a th:href="@{'/admin/myOrders'}">Orders List </a>
+				<a th:href="@{'/admin/myorderbook'}">Orders Book List </a>
+			</button>
+			</button>
+			<button>
+				<a
+					th:href="@{'/orderBookEdit/' + ${order.orderBook.orderBookId}}">Back
+					to Order Edit </a>
 			</button>
 		</div>
 	</div>

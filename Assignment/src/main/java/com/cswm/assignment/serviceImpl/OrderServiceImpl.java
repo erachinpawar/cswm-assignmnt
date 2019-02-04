@@ -121,9 +121,11 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-	public List<Order> getValidOrders(OrderBook orderBook) {
+	public List<Order> getValidOrders(OrderBook orderBook, Execution execution) {
 		List<Order> allOrdersForBook = orderRepository.findAllByOrderBook(orderBook);
-		Double executionPrice = orderBook.getExecutions().iterator().next().getPrice();
+		Double executionPrice = CollectionUtils.isEmpty(orderBook.getExecutions())
+				? (null != execution ? execution.getPrice() : 0d)
+				: orderBook.getExecutions().iterator().next().getPrice();
 		// if first execution execution price from them
 		List<Order> validOrders = new ArrayList<Order>();
 		allOrdersForBook.forEach(order -> {
@@ -230,4 +232,5 @@ public class OrderServiceImpl implements OrderService {
 
 		return orderRepository.getByOrderBookID(orderBookId);
 	}
+
 }

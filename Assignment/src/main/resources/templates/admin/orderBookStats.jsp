@@ -46,7 +46,7 @@
 				
 				<p> Book Id : <input type="text" th:field="${orderBook.orderBookId}" readonly="readonly"/>
 				<p> Book Name : <input type="text" th:field="${orderBook.orderBookName}" readonly="readonly"/></p>
-				<p> Order Book Status :  <input type="text" th:field="${orderBook.orderBookStatus.statusValue}" readonly="readonly"/></p>
+				<p> Order Book Status :  <input type="text" th:field="${orderBook.orderBookStatus}" readonly="readonly"/></p>
 				<p> Order Book Instrument ID: <input type="text" th:field="${orderBook.instrument.instrumentName}" readonly="readonly"/></p>
 				<p> Order Book Execution Status : <input type="text" th:field="${orderBook.executionStatus}" readonly="readonly" />
 				<p> Order Book Created By  : <input type="text" th:field="${orderBook.createdBy}" readonly="readonly"/>
@@ -101,8 +101,8 @@
 						<td th:text="${entry?.value?.instrument?.instrumentName}" />
 						<td th:text="${entry?.value?.orderQuantity}" />
 						<td th:text="${entry?.value?.orderprice}" />
-						<td th:text="${entry?.value?.orderStatus?.statusValue}" />
-						<td th:text="${entry?.value.orderType?.orderType}" />
+						<td th:text="${entry?.value?.orderStatus}" />
+						<td th:text="${entry?.value?.orderType}" />
 						<td th:text="${entry?.value?.executionQuantity}" />
 						<td th:text="${entry?.value?.createdBy}" />
 						<td th:text="${entry?.value?.createdOn}" />
@@ -112,7 +112,7 @@
 				<br />  <br>
 				<p>
 					<button><a th:href="@{'/admin/myorderbook'}">OrderBook List </a></button>
-								<button><a th:href="@{'/orderBookEdit/'+ ${orderBook.orderBookId} }">Back To Order Book</a></button>
+					<button><a th:href="@{'/orderBookEdit/'+ ${orderBook.orderBookId} }">Back To Order Book</a></button>
 					
 					
 				</p>

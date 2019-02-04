@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+	xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>Credit-Suisse WM</title>
@@ -35,29 +35,36 @@
 				</div>
 
 			</div>
-			<br><br>
+			<br> <br>
 			<p class="admin-message-text text-center" th:utext="${adminMessage}"></p>
 
-			<form action="#" th:action="@{/saveOrder}" th:object="${order}"
-				method="post">
+			<form action="#" th:action="@{/saveOrder}"
+				th:object="${orderBuilder}" method="post">
+
 				<p>
-					Order Id : <input type="text" th:field="*{orderId}"   readonly="readonly"/>
+					Order Book Id : <input type="text"
+						th:field="*{orderBook.orderBookId}" readonly="readonly" />
+				</p>
+
+				<p>
+					Order Book Id : <input type="text"
+						th:field="*{orderBook.orderBookName}" readonly="readonly" />
+				</p>
+
+				<p>
+					Order Id : <input type="text" th:field="*{orderId}"
+						readonly="readonly" />
 				</p>
 				<p>
 					Order Name : <input type="text" th:field="*{orderName}" />
 				</p>
-				
-				
 
-				<p> Order Instrument ID: 
-									<select th:field="*{instrument.refInstrumentId}">
-					                         <option th:each="entry : ${instrumentMap}"
-					                                 th:value="${entry.key}"
-					                                 th:utext="${entry.value.instrumentName}"
-					                                 th:selected="*{instrument.refInstrumentId}">
-					                         </option>
-					                  </select>
-
+				<p>
+					Order Book Instrument ID: <input type="text" 
+					th:field="*{instrument.instrumentId}" readonly="readonly" />
+				<p>
+					Order Book Instrument Name: <input type="text" 
+					th:field="*{instrument.instrumentName}" readonly="readonly" />
 				<p>
 					Quantity : <input type="text" th:field="*{orderQuantity}" />
 				</p>
@@ -65,40 +72,53 @@
 					Total Price Of Order : <input type="text" th:field="*{orderprice}" />
 				</p>
 				<p>
-					Order Type : 
-					<select th:field="*{orderType.orderTypeId}">
-					                         <option th:each="entry : ${orderTypeMap}"
-					                                 th:value="${entry.key}"
-					                                 th:utext="${entry.value.orderType}"
-					                                 th:selected="*{orderType.orderTypeId}">
-					                         </option>
-					                  </select>
-				</p>
-				
-				<p>
-					Execution Quantity : <input type="text" th:field="*{executionQuantity}"  readonly="readonly"/>
+					Order Type : <select th:field="*{orderType}">
+						<option
+							th:each="orderType : ${T(com.cswm.assignment.model.Order.OrderType).values()}"
+							th:value="${orderType}" 
+							th:text="${orderType}"
+							th:selected="*{orderType}"></option>
+					</select>
 				</p>
 
 				<p>
-					Created By : <input type="text" th:field="*{createdBy}"  readonly="readonly"/>
+					Execution Quantity : <input type="text"
+						th:field="*{executionQuantity}" readonly="readonly" />
+				</p>
+
+				<p>
+					Created By : <input type="text" th:field="*{createdBy}"
+						readonly="readonly" />
 				</p>
 				<p>
-					Created On : <input type="text" th:field="*{createdOn}"  readonly="readonly"/>
+					Created On : <input type="text" th:field="*{createdOn}"
+						readonly="readonly" />
 				</p>
 
 				<br>
 				<p>
 					<input type="submit" value="Submit" /> <input type="reset"
 						value="Reset" />
-						
-						<button><a th:href="@{'/admin/myOrders'}">Orders List </a></button>
+
+					<button>
+						<a
+							th:href="@{'/orderBookEdit/' + ${orderBuilder.orderBook.orderBookId}}">Back
+							to Order Edit </a>
+					</button>
+					<button>
+						<a th:href="@{'/admin/myorderbook'}">Order Book List </a>
+					</button>
+					</button>
+						<button>
+						<a th:href="@{'/getBookStats/'+ ${orderBuilder.orderId}}">OrderBook Statistics </a>
+					</button>
 				</p>
 			</form>
-			
 
 
 
-				</div>
+
+		</div>
 
 
 

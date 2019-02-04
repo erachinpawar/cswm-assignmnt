@@ -162,7 +162,9 @@ public class orderBookTest extends AbstractTest {
 		orderBook.setOrderBookName("Demo OrderBok");
 		orderBook.setExecutions(null);
 		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
+		
 		Instrument instrument = new Instrument();
+		instrument.setInstrumentId(1001l);
 		instrument.setCreatedBy("Jnit Test");
 		instrument.setCreatedOn(new Date());
 		instrument.setInstrumentName("New Instrument");
@@ -438,7 +440,7 @@ public class orderBookTest extends AbstractTest {
 		Instrument instrument = instrumentService.getInstrument(1001l);
 		openBook();
 		String uri = "/orderbooks/1001/orders";
-		Order order = new Order("Unit Test Crated", instrument, 200l, null, OrderStatus.VALID, OrderType.LIMIT_ORDER,
+		Order order = new Order("Unit Test Crated", instrument, 200l, null, OrderStatus.VALID, OrderType.MARKET_ORDER,
 				null, 2d, "Unit Test Crated", new Date());
 		String inputJson = mapToJson(order);
 		MvcResult mvcResult = mvc.perform(

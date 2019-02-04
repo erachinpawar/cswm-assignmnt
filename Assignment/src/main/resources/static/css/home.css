@@ -82,3 +82,14 @@
 .dropdown:hover .dropdown-content {
   display: block;
 }
+
+div.centered 
+{
+    text-align: center;
+}
+
+div.centered table 
+{
+    margin: 0 auto; 
+    text-align: left;
+}

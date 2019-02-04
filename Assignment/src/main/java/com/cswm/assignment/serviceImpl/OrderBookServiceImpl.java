@@ -1,6 +1,7 @@
 package com.cswm.assignment.serviceImpl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cswm.assignment.ApplicationConstants;
 import com.cswm.assignment.applicationUtils.ErrorMessageEnum;
 import com.cswm.assignment.applicationUtils.StatsUtil;
 import com.cswm.assignment.exceptions.ApplicationException;
@@ -25,6 +27,7 @@ import com.cswm.assignment.model.OrderBook.ExecutionStatus;
 import com.cswm.assignment.model.OrderBook.OrderBookStatus;
 import com.cswm.assignment.modelvos.OrderBookStatsVo;
 import com.cswm.assignment.repository.OrderBookRepository;
+import com.cswm.assignment.service.InstrumentService;
 import com.cswm.assignment.service.OrderBookService;
 import com.cswm.assignment.service.OrderService;
 
@@ -37,6 +40,9 @@ public class OrderBookServiceImpl implements OrderBookService {
 
 	@Autowired
 	OrderService orderService;
+
+	@Autowired
+	InstrumentService instrumentService;
 
 	public final String CLOSED_STATUS = "close";
 
@@ -59,6 +65,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 	public OrderBook saveBook(OrderBook orderBook) {
 
 		validate(orderBook);
+		orderBook.setInstrument(instrumentService.getInstrument(orderBook.getInstrument().getInstrumentId()));
 		if (!CollectionUtils.isEmpty(orderBook.getOrders())) {
 			orderBook.getOrders().forEach(order -> orderService.deleteOrder(order.getOrderId()));
 		}
@@ -83,6 +90,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 	@Override
 	public OrderBook updateBook(OrderBook orderBook, Long bookId) {
 		orderBook.setOrderBookId(bookId);
+		orderBook.setInstrument(instrumentService.getInstrument(orderBook.getInstrument().getInstrumentId()));
 		return orderBookRepository.save(orderBook);
 	}
 
@@ -130,7 +138,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 
 	private OrderBook addExecutionToClosedBook(OrderBook orderBook, Execution execution) {
 // Need to add execution here for valid order calculator
-		List<Order> validOrders = orderService.getValidOrders(orderBook);
+		List<Order> validOrders = orderService.getValidOrders(orderBook, execution);
 		Long accumltdOrders = orderService.getAccOrdersFromValidOrders(validOrders);
 		Double accExecQty = orderService.getTotExecQtyValidOrders(validOrders);
 
@@ -157,7 +165,6 @@ public class OrderBookServiceImpl implements OrderBookService {
 		return orderBook;
 	}
 
-
 	private void updateEffQtyAndSave(Long effectiveQuanty, OrderBook orderBook, Execution execution) {
 
 		execution.setQuantity(effectiveQuanty);
@@ -173,7 +180,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 	@Override
 	public OrderBookStatsVo getOrderBookStats(Long orderBookId) {
 		OrderBook orderBook = getOrderBook(orderBookId);
-		List<Order> validOrders = orderService.getValidOrders(orderBook);
+		List<Order> validOrders = orderService.getValidOrders(orderBook, null);
 		List<Order> bookOrders = orderService.getOrdersByOrderBook(orderBookId);
 		List<Order> invalidOrders = new ArrayList<>(bookOrders);
 		invalidOrders.removeAll(validOrders);
@@ -186,7 +193,8 @@ public class OrderBookServiceImpl implements OrderBookService {
 				.setInvalidDemand(orderService.getAccOrdersFromValidOrders(invalidOrders))
 				.setExecutionQty(orderService.getTotExecQtyValidOrders(validOrders));
 		orderBookStatsVo.setExecutionPrice(
-				orderBookStatsVo.getExecutionQty() * orderBook.getExecutions().iterator().next().getPrice());
+				orderBookStatsVo.getExecutionQty() * (CollectionUtils.isEmpty(orderBook.getExecutions()) ? 0d
+						: orderBook.getExecutions().iterator().next().getPrice()));
 		return orderBookStatsVo;
 	}
 
@@ -205,6 +213,17 @@ public class OrderBookServiceImpl implements OrderBookService {
 		OrderBook orderBook = getOrderBook(bookId);
 		orderBook = orderService.addOrderInBook(order, orderBook);
 		return orderBookRepository.save(orderBook);
+	}
+
+	@Override
+	public OrderBook createDefaultOrderBook() {
+		OrderBook orderBook = new OrderBook();
+		orderBook.setCreatedBy(ApplicationConstants.DEFAULT_USER);
+		orderBook.setCreatedOn(new Date());
+		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
+		;
+		orderBook.setOrderBookStatus(OrderBookStatus.OPEN);
+		return orderBook;
 	}
 
 }

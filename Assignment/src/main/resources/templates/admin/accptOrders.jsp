@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+	xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>CS-WMPage Page</title>
@@ -37,7 +37,8 @@
 				</div>
 
 			</div>
-			<br><br>
+			<br>
+			<br>
 			<p class="admin-message-text text-center" th:utext="${adminMessage}"></p>
 
 			<form action="#" th:action="@{/saveOrderBook}"
@@ -50,77 +51,83 @@
 					Book Name : <input type="text" th:field="*{orderBookName}" />
 				</p>
 				<p>
-				Order Book Execution Status : <input type="text"
-					th:field="*{executionStatus}" readonly="readonly" />
+					Order Book Execution Status : <input type="text"
+						th:field="*{executionStatus}" readonly="readonly" />
 				<p>
-				Order Book Created By : <input type="text" th:field="*{createdBy}" />
+					Order Book Created By : <input type="text" th:field="*{createdBy}" />
 				<p>
-				Order Book Created on : <input type="text" th:field="*{createdOn}" />
+					Order Book Created on : <input type="text" th:field="*{createdOn}" />
 				</p>
 
 				<h1>Orphan Orders for the Instrument:</h1>
-				<table border="2" width="70%" cellpadding="2">
-					<tr>
-						<th>Order Id</th>
-						<th>Order Name</th>
-						<th>Instrument Name</th>
-						<th>Quantity</th>
-						<th>Total Price Of Order</th>
-						<th>Status of Order</th>
-						<th>Order Type</th>
-						<th>Execution Quantity</th>
-						<th>Created By</th>
-						<th>Created ON</th>
-						<th>Accept</th>
-					</tr>
+				<span
+					th:text="${#numbers.formatDecimal(orderSum, 0, 'COMMA', 2, 'POINT')}">
+					<table border="2" width="70%" cellpadding="2">
+						<tr>
+							<th>Order Id</th>
+							<th>Order Name</th>
+							<th>Instrument Name</th>
+							<th>Quantity</th>
+							<th>Total Price Of Order</th>
+							<th>Status of Order</th>
+							<th>Order Type</th>
+							<th>Execution Quantity</th>
+							<th>Created By</th>
+							<th>Created ON</th>
+							<th>Accept</th>
+						</tr>
 
-					<tr th:each="order : ${orphanOrders}">
-						<td th:text="${order.orderId}" />
-						<td th:text="${order.orderName}" />
-						<td th:text="${order.instrument.instrumentName}" />
-						<td th:text="${order.orderQuantity}" />
-						<td th:text="${order.orderprice}" />
-						<td th:text="${order?.orderStatus?.statusValue}" />
-						<td th:text="${order.orderType.orderType}" />
-						<td th:text="${order.executionQuantity}" />
-						<td th:text="${order.createdBy}" />
-						<td th:text="${order.createdOn}" />
-						<td><a
-							th:href="@{'/orderBooks/'+${orderBook.orderBookId}+'/acceptOrder/' + ${order.orderId} }"
-							th:if="${orderBook.orderBookStatus.orderBookStatusId == 1001} ">Accept Order</a>
-						</td>
-					</tr>
+						<tr th:each="order : ${orphanOrders}">
+							<td th:text="${order.orderId}" />
+							<td th:text="${order.orderName}" />
+							<td th:text="${order.instrument.instrumentName}" />
+							<td th:text="${order.orderQuantity}" />
+							<td th:text="${order.orderprice}" />
+							<td th:text="${order?.orderStatus?.statusValue}" />
+							<td th:text="${order.orderType.orderType}" />
+							<td th:text="${order.executionQuantity}" />
+							<td th:text="${order.createdBy}" />
+							<td th:text="${order.createdOn}" />
+							<td><a
+								th:href="@{'/orderBooks/'+${orderBook.orderBookId}+'/acceptOrder/' + ${order.orderId} }"
+								th:if="${orderBook.orderBookStatus.orderBookStatusId == 1001} ">Accept
+									Order</a></td>
+						</tr>
 
-				</table>
-				
-				<h3>Execution List to the Order Book: </h3>
-				<table border="2" width="70%" cellpadding="2">
-					<tr>
-						<th>Execution Id</th>
-						<th>Execution Name</th>
-						<th>Execution Price</th>
-						<th>Quantity</th>
-						<th>Created By</th>
-						<th>Created ON</th>
-					</tr>
+					</table>
 
-					<tr th:each="execution : ${orderBook.executions}">
-						<td th:text="${execution.executionId}" />
-						<td th:text="${execution.executionName}" />
-						<td th:text="${execution.price}" />
-						<td th:text="${execution.quantity}" />
-						<td th:text="${execution.createdBy}" />
-						<td th:text="${execution.createdOn}" />
-					</tr>
+					<h3>Execution List to the Order Book:</h3>
+					<table border="2" width="70%" cellpadding="2">
+						<tr>
+							<th>Execution Id</th>
+							<th>Execution Name</th>
+							<th>Execution Price</th>
+							<th>Quantity</th>
+							<th>Created By</th>
+							<th>Created ON</th>
+						</tr>
 
-				</table>
-				
+						<tr th:each="execution : ${orderBook.executions}">
+							<td th:text="${execution.executionId}" />
+							<td th:text="${execution.executionName}" />
+							<td th:text="${execution.price}" />
+							<td th:text="${execution.quantity}" />
+							<td th:text="${execution.createdBy}" />
+							<td th:text="${execution.createdOn}" />
+						</tr>
 
-				<br />  <br>
+					</table>
+
+				</span> <br /> <br>
 				<p>
 					<input type="reset" value="Reset" />
-					<button><a th:href="@{'/orderBookEdit/'+ ${orderBook.orderBookId} }">Back To Order Book</a></button>
-					<button><a th:href="@{'/admin/myorderbook'}">OrderBook List </a></button>
+					<button>
+						<a th:href="@{'/orderBookEdit/'+ ${orderBook.orderBookId} }">Back
+							To Order Book</a>
+					</button>
+					<button>
+						<a th:href="@{'/admin/myorderbook'}">OrderBook List </a>
+					</button>
 				</p>
 			</form>
 
