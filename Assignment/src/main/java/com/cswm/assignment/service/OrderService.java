@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import com.cswm.assignment.model.Execution;
 import com.cswm.assignment.model.Instrument;
 import com.cswm.assignment.model.Order;
 import com.cswm.assignment.model.OrderBook;
@@ -28,7 +29,7 @@ public interface OrderService {
 
 	Collection<Order> getOrdersByInstruments(Instrument instrument);
 
-	List<Order> getValidOrders(OrderBook orderBook);
+	List<Order> getValidOrders(OrderBook orderBook, Execution execution);
 
 	Long getAccOrdersFromValidOrders(List<Order> validOrders);
 
@@ -49,6 +50,7 @@ public interface OrderService {
 	OrderBook addOrderInBook(Order order, OrderBook orderBook);
 
 	Set<Order> getOrdersFromDBforBook(Long orderBookId);
+
 
 
 	

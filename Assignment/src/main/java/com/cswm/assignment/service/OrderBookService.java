@@ -31,5 +31,7 @@ public interface OrderBookService  {
 
 	OrderBook addOrderInBook(Order order, Long bookId);
 
+	OrderBook createDefaultOrderBook();
+
 
 }
