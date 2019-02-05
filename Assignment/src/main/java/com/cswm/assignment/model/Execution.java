@@ -1,7 +1,7 @@
 package com.cswm.assignment.model;
 
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -30,9 +30,11 @@ public class Execution {
 	private String executionName;
 
 	@Column(name = "price")
+	@ColumnDefault("0")
 	private Double price;
 
 	@Column(name = "qty")
+	@ColumnDefault("0")
 	private Long quantity;
 
 	@ManyToOne(fetch = FetchType.EAGER, optional = true)
@@ -43,9 +45,8 @@ public class Execution {
 	@Column(name = "created_by")
 	private String createdBy;
 
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Column(name = "created_on")
-	private Date createdOn;
+	private LocalDateTime createdOn;
 
 	public Execution() {
 	}
@@ -98,11 +99,11 @@ public class Execution {
 		this.createdBy = createdBy;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDateTime getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(LocalDateTime createdOn) {
 		this.createdOn = createdOn;
 	}
 

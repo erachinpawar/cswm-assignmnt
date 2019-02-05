@@ -55,20 +55,10 @@
 							th:selected="*{orderBookStatus}"></option>
 
 					</select>
-				</p>
-				Order Book Instrument ID: <select
-					th:field="*{instrument.instrumentId}"
-					th:if="@{${orderBook.orderBookId==null}}">
-					<option th:each="instrument : ${instrumentMap}"
-						th:value="${instrument.instrumentId}"
-						th:utext="${instrument.instrumentName}"
-						th:selected="*{instrument.instrumentId}"></option>
-				</select> <input type="text" th:if="@{${orderBook.orderBookId!=null}}"
-					th:field="*{instrument.instrumentId}" readonly="readonly" />
-				<p>
-				<p th:if="@{${orderBook.orderBookId!=null}}">
+					
+				<p >
 					Order Book Instrument Name: <input type="text"
-						th:field="*{instrument.instrumentName}" readonly="readonly" />
+						th:field="*{instrument.instrumentName}" th:readonly="${orderBook.orderBookId!=null}" />
 				</p>
 
 				<p>
@@ -152,7 +142,7 @@
 					</button>
 
 					<button
-						th:if="${orderBook.orderBookStatus == T(com.cswm.assignment.model.OrderBook.OrderBookStatus).CLOSED 
+						th:if="${orderBook.orderBookStatus == T(com.cswm.assignment.model.OrderBook.OrderBookStatus).CLOSE
 								and orderBook.executionStatus!=T(com.cswm.assignment.model.OrderBook.ExecutionStatus).EXECUTED 
 								and orderBook.orderBookId !=0} ">
 						<a

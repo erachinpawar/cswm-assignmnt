@@ -32,7 +32,10 @@ public enum ErrorMessageEnum {
 	ORDER_NAME_INVALID("Order Name can not be empty"),
 	ORDER_QUANTITY_INVALID("Order Quantity can not be empty or negative"),
 	ORDER_PRICE_INVALID("Order Price can not be empty or negative"), ORDER_TYPE_INVALID("Order Type can not be empty"),
-	INSRTUMENT_NAME_INVALID("Instument name can not be empty");
+	INSRTUMENT_NAME_INVALID("Instument name can not be empty"),
+	BOOK_STATUS_OPEN_CLOSE("Possible values of the book status are OPEN / CLOSE only"),
+	INVALID_EXECUTION_NAME("Execution Name Invalid"), EXECUTION_QTY_INVALID("Execution Quantity Invalid"),
+	EXECUTION_PRICE_INVALID("Execution price is not equal to prev executions");
 
 	private String message;
 

@@ -68,7 +68,7 @@
 							th:if="${orderBook.orderBookStatus.toString()  == 'OPEN'}">Close</a>
 							<a
 							th:href="@{'/orderBookOpen/' + ${orderBook.orderBookId}}"
-							th:if="${orderBook.orderBookStatus.toString()  == 'CLOSED'}">Open</a>
+							th:if="${orderBook.orderBookStatus.toString()  == 'CLOSE'}">Open</a>
 						</td>
 						<td>
 							<a th:href="@{'/getBookStats/'+ ${orderBook.orderBookId}}">OrderBook Statistics </a>

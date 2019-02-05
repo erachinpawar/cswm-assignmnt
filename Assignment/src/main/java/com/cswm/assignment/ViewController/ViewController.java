@@ -1,6 +1,6 @@
 package com.cswm.assignment.ViewController;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.cswm.assignment.ApplicationConstants;
-import com.cswm.assignment.controller.InstrumentController;
 import com.cswm.assignment.controller.OrderBookController;
-import com.cswm.assignment.controller.OrderController;
 import com.cswm.assignment.model.Execution;
 import com.cswm.assignment.model.Order;
 import com.cswm.assignment.model.Order.OrderBuilder;
@@ -22,6 +20,7 @@ import com.cswm.assignment.model.OrderBook;
 import com.cswm.assignment.modelvos.OrderBookStatsVo;
 import com.cswm.assignment.modelvos.OrderStatsVo;
 import com.cswm.assignment.service.ExecutionService;
+import com.cswm.assignment.service.InstrumentService;
 import com.cswm.assignment.service.OrderBookService;
 import com.cswm.assignment.service.OrderService;
 
@@ -32,10 +31,10 @@ public class ViewController {
 	OrderBookController orderBookController;
 
 	@Autowired
-	OrderController orderController;
+	OrderService orderController;
 
 	@Autowired
-	InstrumentController instrumentController;
+	InstrumentService instrumentService;
 
 	@Autowired
 	OrderBookService orderBookService;
@@ -71,7 +70,6 @@ public class ViewController {
 		ModelAndView modelAndView = new ModelAndView();
 		OrderBook orderBook = orderBookService.createDefaultOrderBook();
 		modelAndView.addObject("orderBook", orderBook);
-		modelAndView.addObject("instrumentMap", instrumentController.getInstruments());
 		modelAndView.addObject("adminMessage", "Create - Order Book");
 		modelAndView.addObject("userName", "Welcome : " + ApplicationConstants.DEFAULT_USER);
 		modelAndView.setViewName("admin/editorderbook");
@@ -83,7 +81,6 @@ public class ViewController {
 		ModelAndView modelAndView = new ModelAndView();
 		OrderBook orderBook = orderBookController.getOrderBook(orderBookId);
 		modelAndView.addObject("orderBook", orderBook);
-		modelAndView.addObject("instrumentMap", instrumentController.getInstruments());
 		modelAndView.addObject("adminMessage", "Modify  - Order Book");
 		modelAndView.addObject("userName", "Welcome : " + ApplicationConstants.DEFAULT_USER);
 		modelAndView.setViewName("admin/editorderbook");
@@ -92,22 +89,22 @@ public class ViewController {
 
 	@RequestMapping(value = "/orderBookClose/{orderBookId}", method = RequestMethod.GET)
 	public String closeOrderBook(@PathVariable long orderBookId) {
-		orderBookController.openCloseOrderBook("close", orderBookId);
+		orderBookController.openCloseOrderBook(orderBookId,"close");
 		return "redirect:/admin/myorderbook";
 	}
 
 	@RequestMapping(value = "/orderBookOpen/{orderBookId}", method = RequestMethod.GET)
 	public String openOrderBook(@PathVariable long orderBookId) {
-		orderBookController.openCloseOrderBook("open", orderBookId);
+		orderBookController.openCloseOrderBook(orderBookId,"open");
 		return "redirect:/admin/myorderbook";
 	}
 
 	@RequestMapping(value = "/saveOrderBook", method = RequestMethod.POST)
 	public String saveOrderBook(OrderBook orderBook, BindingResult bindingResult) {
 		orderBook.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-		orderBook.setCreatedOn(new Date());
+		orderBook.setCreatedOn(LocalDateTime.now());
 		if (null == orderBook.getOrderBookId())
-			orderBookController.newOrderBook(orderBook);
+			orderBookController.createOrderBook(orderBook);
 		else
 			orderBookController.updateOrderBook(orderBook, orderBook.getOrderBookId());
 		return "redirect:/admin/myorderbook";
@@ -120,10 +117,9 @@ public class ViewController {
 		OrderBook orderBook=orderBookService.getOrderBook(orderBookId);
 		orderBuilder.setOrderBook(orderBook);
 		orderBuilder.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-		orderBuilder.setCreatedOn(new Date());
+		orderBuilder.setCreatedOn(LocalDateTime.now());
 		orderBuilder.setInstrument(orderBook.getInstrument());
 		modelAndView.addObject("orderBuilder", orderBuilder);
-		modelAndView.addObject("instrumentMap", instrumentController.getInstruments());
 		modelAndView.addObject("adminMessage", "Modify - Order Details");
 		modelAndView.addObject("userName", "Welcome : " + ApplicationConstants.DEFAULT_USER);
 		modelAndView.setViewName("admin/editorder");
@@ -132,7 +128,7 @@ public class ViewController {
 
 	@RequestMapping(value = "/saveOrder", method = RequestMethod.POST)
 	public String saveOrderBook(OrderBuilder orderBuilder) {
-		orderBookController.newOrder(new Order(orderBuilder), orderBuilder.getOrderBook().getOrderBookId());
+		orderBookController.addOrderToOrderBook(new Order(orderBuilder), orderBuilder.getOrderBook().getOrderBookId());
 		return "redirect:/orderBookEdit/" + orderBuilder.getOrderBook().getOrderBookId();
 	}
 	
@@ -141,7 +137,7 @@ public class ViewController {
 		ModelAndView modelAndView = new ModelAndView();
 		OrderBook orderBook = orderBookController.getOrderBook(orderBookId);
 		modelAndView.addObject("orderBook", orderBook);
-		Execution execution=executionService.execurtiogetTempExecutionForOrder(orderBook);
+		Execution execution=executionService.getTempExecutionForOrder(orderBook);
 		modelAndView.addObject("execution", execution);
 		modelAndView.addObject("adminMessage", "Order Book - Add Execution");
 		modelAndView.addObject("userName", "Welcome : " + ApplicationConstants.DEFAULT_USER);
@@ -171,7 +167,7 @@ public class ViewController {
 	public ModelAndView getOrderStats(@PathVariable long orderId) {
 		ModelAndView modelAndView = new ModelAndView();
 		OrderStatsVo orderStatsVo=orderController.getOrderStats(orderId);
-		Order order = orderController.getOrder(orderId);
+		Order order = orderStatsVo.getOrder();
 		modelAndView.addObject("orderStatsVo", orderStatsVo);
 		modelAndView.addObject("adminMessage", "Order Statistics");
 		modelAndView.addObject("order", order);

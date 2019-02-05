@@ -1,6 +1,6 @@
 package com.cswm.assignment.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -17,8 +17,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
@@ -29,7 +27,7 @@ import lombok.Data;
 public class OrderBook {
 
 	public enum OrderBookStatus {
-		OPEN, CLOSED
+		OPEN, CLOSE
 	}
 
 	public enum ExecutionStatus {
@@ -44,7 +42,7 @@ public class OrderBook {
 	@Column(name = "order_book_name")
 	private String orderBookName;
 
-	@OneToOne(cascade=CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "instrument_id")
 	private Instrument instrument;
 
@@ -67,12 +65,9 @@ public class OrderBook {
 	@Column(name = "created_by")
 	private String createdBy;
 
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Column(name = "created_on")
-	private Date createdOn;
+	private LocalDateTime createdOn;
 
-	
-	
 	public OrderBook() {
 	}
 
@@ -116,16 +111,13 @@ public class OrderBook {
 		this.createdBy = createdBy;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDateTime getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(LocalDateTime createdOn) {
 		this.createdOn = createdOn;
 	}
-
-
-	
 
 	public ExecutionStatus getExecutionStatus() {
 		return executionStatus;

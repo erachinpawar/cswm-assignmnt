@@ -5,23 +5,21 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.cswm.assignment.model.Execution;
-import com.cswm.assignment.model.Instrument;
 import com.cswm.assignment.model.Order;
 import com.cswm.assignment.model.OrderBook;
 import com.cswm.assignment.modelvos.OrderBookStatsVo;
+import com.cswm.assignment.modelvos.OrderStatsVo;
 
 @Service
-public interface OrderBookService  {
+public interface OrderBookService {
 
-	List<OrderBook>  getOrderBooks();
+	List<OrderBook> getOrderBooks();
 
-	OrderBook getOrderBook(Long bookId);
+	OrderBook getOrderBook(Long orderBookId);
 
 	OrderBook saveBook(OrderBook orderBook);
 
-	OrderBook updateBook(OrderBook orderBook,Long bookId);
-
-	List<OrderBook> getOrderBooksByInstruments(Instrument instrument);
+	OrderBook addOrderInBook(Long orderBookId, Order order);
 
 	OrderBook openCloseOrderBook(String orderBookStatus, Long orderBookId);
 
@@ -29,9 +27,10 @@ public interface OrderBookService  {
 
 	OrderBookStatsVo getOrderBookStats(Long orderBookId);
 
-	OrderBook addOrderInBook(Order order, Long bookId);
+	OrderStatsVo getOrderStats(Long orderBookId, Long orderId);
 
 	OrderBook createDefaultOrderBook();
 
+	OrderBook updateBook(OrderBook orderBook, Long orderBookId);
 
 }

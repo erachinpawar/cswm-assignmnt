@@ -1,6 +1,6 @@
 package com.cswm.assignment.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,8 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import org.springframework.format.annotation.DateTimeFormat;
 
 import lombok.Data;
 
@@ -29,11 +27,14 @@ public class Instrument {
 	@Column(name = "created_by")
 	private String createdBy;
 
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Column(name = "created_on")
-	private Date createdOn;
+	private LocalDateTime createdOn;
 
-	public Instrument() {
+	public Instrument() {	}
+
+	
+	public Instrument(String instrumentName) {
+		this.instrumentName=instrumentName;
 	}
 
 	public Long getInstrumentId() {
@@ -60,11 +61,11 @@ public class Instrument {
 		this.createdBy = createdBy;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDateTime getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(LocalDateTime createdOn) {
 		this.createdOn = createdOn;
 	}
 
