@@ -31,7 +31,6 @@
 					<ul>
 						<li><a href="/admin/home">Home</a></li>
 						<li><a href="/admin/myorderbook">Order Book Inventory</a></li>
-						<li><a href="/admin/myOrders">Order Inventory</a></li>
 						<li><a href="/admin/AboutMe">About Me</a></li>
 					</ul>
 				</div>

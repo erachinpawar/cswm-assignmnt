@@ -576,6 +576,7 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
 		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.PARTIALLY_EXECUTED.getMessage(), message.getMessage());
 	}
 
 }
