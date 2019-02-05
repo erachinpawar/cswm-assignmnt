@@ -531,9 +531,9 @@ public class orderBookTest extends AbstractTest {
 				.andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
-		Message message = mapFromJson(content, Message.class);
-		assertEquals(406, status);
-		assertEquals(ErrorMessageEnum.PARTIALLY_EXECUTED.getMessage(), message.getMessage());
+		orderBook = mapFromJson(content, OrderBook.class);
+		assertEquals(200, status);
+		assertEquals(3, orderBook.getExecutions().size());
 	}
 
 	@Test
@@ -576,7 +576,6 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
 		assertEquals(406, status);
-		assertEquals(ErrorMessageEnum.ORDER_BOOK_EXECUTED.getMessage(), message.getMessage());
 	}
 
 }
