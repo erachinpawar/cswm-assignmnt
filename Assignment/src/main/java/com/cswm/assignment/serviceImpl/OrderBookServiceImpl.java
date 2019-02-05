@@ -138,15 +138,12 @@ public class OrderBookServiceImpl implements OrderBookService {
 		Long accumltdOrders = orderService.getAccOrdersFromValidOrders(validOrders);
 		Long accExecQty = orderService.getTotExecQtyValidOrders(validOrders);
 
-		if (accumltdOrders <= accExecQty.doubleValue()) {
-			if (null==orderBook.getExecutionStatus()||ExecutionStatus.NOT_EXECUTED.equals(orderBook.getExecutionStatus())) {
-				orderBook.setExecutionStatus(ExecutionStatus.EXECUTED);
-				orderBookRepository.save(orderBook);
-				throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_EXECUTED);
-			}
-		}
-
-		else {
+		if (accumltdOrders <= accExecQty.doubleValue() && (null == orderBook.getExecutionStatus()
+				|| ExecutionStatus.NOT_EXECUTED.equals(orderBook.getExecutionStatus()))) {
+			orderBook.setExecutionStatus(ExecutionStatus.EXECUTED);
+			orderBookRepository.save(orderBook);
+			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_EXECUTED);
+		} else {
 			Long effectiveQuanty = StatsUtil.getEffectiveQtyForExec(accumltdOrders, accExecQty,
 					execution.getQuantity());
 			orderBook.getOrders().removeAll(validOrders);
@@ -209,7 +206,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 	public OrderStatsVo getOrderStats(Long orderBookId, Long orderId) {
 		return orderService.getOrderStats(orderId);
 	}
-	
+
 	@Override
 	public OrderBook updateBook(OrderBook orderBook, Long bookId) {
 		orderBook.setOrderBookId(bookId);
