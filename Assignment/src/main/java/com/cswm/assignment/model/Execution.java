@@ -1,6 +1,6 @@
 package com.cswm.assignment.model;
 
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
@@ -26,12 +26,9 @@ public class Execution {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_seq")
 	private Long executionId;
 
-	@Column(name = "execution_name")
-	private String executionName;
-
 	@Column(name = "price")
 	@ColumnDefault("0")
-	private Double price;
+	private BigDecimal price; 
 
 	@Column(name = "qty")
 	@ColumnDefault("0")
@@ -41,7 +38,7 @@ public class Execution {
 	@JoinColumn(name = "order_book_id", nullable = false)
 	@JsonBackReference
 	private OrderBook orderBook;
-	
+
 	@Column(name = "created_by")
 	private String createdBy;
 
@@ -59,19 +56,11 @@ public class Execution {
 		this.executionId = executionId;
 	}
 
-	public String getExecutionName() {
-		return executionName;
-	}
-
-	public void setExecutionName(String executionName) {
-		this.executionName = executionName;
-	}
-
-	public Double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(Double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -109,9 +98,8 @@ public class Execution {
 
 	@Override
 	public String toString() {
-		return "Execution [executionId=" + executionId + ", executionName=" + executionName + ", price=" + price
-				+ ", quantity=" + quantity + ", createdBy=" + createdBy + ", createdOn="
-				+ createdOn + "]";
+		return "Execution [executionId=" + executionId + ",  price=" + price + ", quantity=" + quantity + ", createdBy="
+				+ createdBy + ", createdOn=" + createdOn + "]";
 	}
 
 }

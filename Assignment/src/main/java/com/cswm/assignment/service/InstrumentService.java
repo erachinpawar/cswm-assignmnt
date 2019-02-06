@@ -7,10 +7,9 @@ import com.cswm.assignment.model.Instrument;
 @Service
 public interface InstrumentService {
 
-	Instrument getInstrument(String string);
 
 	Instrument addInstrument(Instrument instrument);
 
 	Instrument getInstrumentById(Long instrumentId);
-	
+
 }

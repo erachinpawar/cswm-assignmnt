@@ -1,11 +1,11 @@
 package com.cswm.assignment.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,60 +14,42 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import com.cswm.assignment.model.dto.OrderBuilder;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "orders_inv")
 public class Order {
 
-	public enum OrderType {
-		MARKET_ORDER, LIMIT_ORDER
-	}
-
-	public enum OrderStatus {
-		VALID, INVALID, NO_EXECUTION_ON_BOOK_YET
-	}
-
 
 	@Id
 	@Column(name = "order_id")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_inv_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_inv_seq") 
 	private Long orderId;
 
-	@Column(name = "order_name")
-	private String orderName;
-
 	@OneToOne
-	@JoinColumn(name = "instrument_id")
+	@JoinColumn(name = "instrument_id") 
 	private Instrument instrument;
-
-	@Column(name = "order_quantity")
-	@ColumnDefault("0")
-	private Long orderQuantity;
-
-	@Column(name = "order_price")
-	@ColumnDefault("0")
-	private Double orderprice;
 	
-	@Transient
-	private OrderStatus orderStatus;
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "order_type", length = 20)
-	private OrderType orderType;
-
 	@ManyToOne(fetch = FetchType.EAGER, optional = true)
 	@JoinColumn(name = "order_book_id", nullable = true)
 	@JsonBackReference
 	private OrderBook orderBook;
+	
+	@OneToOne(cascade=CascadeType.ALL)
+	@JoinColumn(name="orderDetails_id")
+	private OrderDetails OrderDetails;
 
-	@Column(name = "execution_quantity")
+	@Column(name = "order_quantity") 
 	@ColumnDefault("0")
-	private Long executionQuantity;
+	private Long orderQuantity;
+
+	@Column(name = "order_price") 
+	@ColumnDefault("0")
+	private BigDecimal orderprice;
 
 	@Column(name = "created_by")
 	private String createdBy;
@@ -77,13 +59,21 @@ public class Order {
 
 	public Order() {
 	}
+	
+	public Order(OrderBuilder orderBuilder) {
+		super();
+		this.orderId = orderBuilder.getOrderId();
+		this.instrument = orderBuilder.getInstrument();
+		this.orderBook=orderBuilder.getOrderBook();
+		this.OrderDetails=orderBuilder.getOrderDetails();
+		this.orderQuantity = orderBuilder.getOrderQuantity();
+		this.orderprice = orderBuilder.getOrderprice();
+		this.createdBy = orderBuilder.getCreatedBy();
+		this.createdOn = orderBuilder.getCreatedOn();
+	}
 
 	public Long getOrderId() {
 		return orderId;
-	}
-
-	public String getOrderName() {
-		return orderName;
 	}
 
 	public Instrument getInstrument() {
@@ -94,24 +84,8 @@ public class Order {
 		return orderQuantity;
 	}
 
-	public Double getOrderprice() {
+	public BigDecimal getOrderprice() {
 		return orderprice;
-	}
-
-	public OrderStatus getOrderStatus() {
-		return orderStatus;
-	}
-
-	public OrderType getOrderType() {
-		return orderType;
-	}
-
-	public OrderBook getOrderBook() {
-		return orderBook;
-	}
-
-	public Long getExecutionQuantity() {
-		return executionQuantity;
 	}
 
 	public String getCreatedBy() {
@@ -122,151 +96,13 @@ public class Order {
 		return createdOn;
 	}
 
-	@Override
-	public String toString() {
-		return "Order [orderId=" + orderId + ", orderName=" + orderName + ", instrument=" + instrument
-				+ ", orderQuantity=" + orderQuantity + ", orderprice=" + orderprice + ", orderStatus=" + orderStatus
-				+ ", orderType=" + orderType + ", executionQuantity=" + executionQuantity + ", createdBy=" + createdBy
-				+ ", createdOn=" + createdOn + "]";
+	public OrderBook getOrderBook() {
+		return orderBook;
 	}
 
-	static public class OrderBuilder {
-		private Long orderId;
-		private String orderName;
-		private Instrument instrument;
-		private Long orderQuantity;
-		private Double orderprice;
-		private OrderStatus orderStatus;
-		private OrderType orderType;
-		private OrderBook orderBook;
-		private Long executionQuantity;
-		private String createdBy;
-		private LocalDateTime createdOn;
-
-		public OrderBuilder(Order order) {
-			this.orderId = order.orderId;
-			this.orderName = order.orderName;
-			this.instrument = order.instrument;
-			this.orderQuantity = order.orderQuantity;
-			this.orderprice = order.orderprice;
-			this.orderStatus = order.orderStatus;
-			this.orderType = order.orderType;
-			this.orderBook = order.orderBook;
-			this.executionQuantity = order.executionQuantity;
-			this.createdBy = order.createdBy;
-			this.createdOn = order.createdOn;
-		}
-
-		public OrderBuilder() {
-		}
-
-		public Long getOrderId() {
-			return orderId;
-		}
-
-		public void setOrderId(Long orderId) {
-			this.orderId = orderId;
-		}
-
-		public String getOrderName() {
-			return orderName;
-		}
-
-		public void setOrderName(String orderName) {
-			this.orderName = orderName;
-		}
-
-		public Instrument getInstrument() {
-			return instrument;
-		}
-
-		public void setInstrument(Instrument instrument) {
-			this.instrument = instrument;
-		}
-
-		public Long getOrderQuantity() {
-			return orderQuantity;
-		}
-
-		public void setOrderQuantity(Long orderQuantity) {
-			this.orderQuantity = orderQuantity;
-		}
-
-		public Double getOrderprice() {
-			return orderprice;
-		}
-
-		public void setOrderprice(Double orderprice) {
-			this.orderprice = orderprice;
-		}
-
-		public OrderStatus getOrderStatus() {
-			return orderStatus;
-		}
-
-		public void setOrderStatus(OrderStatus orderStatus) {
-			this.orderStatus = orderStatus;
-		}
-
-		public OrderType getOrderType() {
-			return orderType;
-		}
-
-		public void setOrderType(OrderType orderType) {
-			this.orderType = orderType;
-		}
-
-		public OrderBook getOrderBook() {
-			return orderBook;
-		}
-
-		public void setOrderBook(OrderBook orderBook) {
-			this.orderBook = orderBook;
-		}
-
-		public Long getExecutionQuantity() {
-			return executionQuantity;
-		}
-
-		public void setExecutionQuantity(Long executionQuantity) {
-			this.executionQuantity = executionQuantity;
-		}
-
-		public String getCreatedBy() {
-			return createdBy;
-		}
-
-		public void setCreatedBy(String createdBy) {
-			this.createdBy = createdBy;
-		}
-
-		public LocalDateTime getCreatedOn() {
-			return createdOn;
-		}
-
-		public void setCreatedOn(LocalDateTime createdOn) {
-			this.createdOn = createdOn;
-		}
-
-		public Order build() {
-			return new Order(this);
-		}
-
+	public OrderDetails getOrderDetails() {
+		return OrderDetails;
 	}
-
-	public Order(OrderBuilder orderBuilder) {
-		super();
-		this.orderId = orderBuilder.orderId;
-		this.orderName = orderBuilder.orderName;
-		this.instrument = orderBuilder.instrument;
-		this.orderQuantity = orderBuilder.orderQuantity;
-		this.orderprice = orderBuilder.orderprice;
-		this.orderStatus = orderBuilder.orderStatus;
-		this.orderType = orderBuilder.orderType;
-		this.orderBook = orderBuilder.orderBook;
-		this.executionQuantity = orderBuilder.executionQuantity;
-		this.createdBy = orderBuilder.createdBy;
-		this.createdOn = orderBuilder.createdOn;
-	}
+	
 
 }

@@ -40,10 +40,8 @@
 				<table border="2" width="70%" cellpadding="2">
 					<tr>
 						<th>Order Book Id</th>
-						<th>Order Book Name</th>
 						<th>Status of Order Book</th>
 						<th>Instrument</th>
-						<th>Execution Status</th>
 						<th>Created By</th>
 						<th>Created ON</th>
 						<th>Delete</th>
@@ -53,18 +51,14 @@
 
 					<tr th:each="orderBook : ${orderBooks}">
 						<td th:text="${orderBook.orderBookId}" />
-						<td th:text="${orderBook.orderBookName}" />
-						<td th:text="${orderBook?.instrument.instrumentName}"></td>
+						<td th:text="${orderBook?.instrument.instrumentId}"></td>
 						<td th:text="${orderBook.orderBookStatus}" />
-						<td th:text="${orderBook.executionStatus}" />
 						<td th:text="${orderBook.createdBy}" />
 						<td th:text="${orderBook.createdOn}" />
 						<td><a
 							th:href="@{'/orderBookEdit/' + ${orderBook.orderBookId}}">Edit</a>
 						</td>
-						<td><a
-							th:href="@{'/orderBookClose/' + ${orderBook.orderBookId}}"
-							th:if="${orderBook.orderBookStatus.toString()  == 'OPEN'}">Close</a>
+						<td>
 							<a
 							th:href="@{'/orderBookOpen/' + ${orderBook.orderBookId}}"
 							th:if="${orderBook.orderBookStatus.toString()  == 'CLOSE'}">Open</a>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+	xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>Credit-Suisse WM</title>
@@ -8,7 +8,8 @@
 <link rel="icon"
 	href="http://logok.org/wp-content/uploads/2014/10/Credit_Suisse_Logo-880x600.png">
 <link rel="" type="" th:href="@{javascript/utils.js}">
-<link rel="icon" href="https://pbs.twimg.com/profile_images/649126783535591424/v0rtnv5-_400x400.png">
+<link rel="icon"
+	href="https://pbs.twimg.com/profile_images/649126783535591424/v0rtnv5-_400x400.png">
 
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -37,22 +38,35 @@
 				</div>
 
 			</div>
-			<br><br>
+			<br>
+			<br>
 			<p class="admin-message-text text-center" th:utext="${adminMessage}"></p>
 
 			<form action="#" th:action="@{/saveOrderBook}"
 				th:object="${orderBook}" method="post">
-				
-				<p> Book Id : <input type="text" th:field="${orderBook.orderBookId}" readonly="readonly"/>
-				<p> Book Name : <input type="text" th:field="${orderBook.orderBookName}" readonly="readonly"/></p>
-				<p> Order Book Status :  <input type="text" th:field="${orderBook.orderBookStatus}" readonly="readonly"/></p>
-				<p> Order Book Instrument ID: <input type="text" th:field="${orderBook.instrument.instrumentName}" readonly="readonly"/></p>
-				<p> Order Book Execution Status : <input type="text" th:field="${orderBook.executionStatus}" readonly="readonly" />
-				<p> Order Book Created By  : <input type="text" th:field="${orderBook.createdBy}" readonly="readonly"/>
-				<p> Order Book Created on : <input type="text" th:field="${orderBook.createdOn}" readonly="readonly"/>
-				
 
-				<h3>Order List in the Order Book: </h3>
+				<p>
+					Book Id : <input type="text" th:field="${orderBook.orderBookId}"
+						readonly="readonly" />
+				<p>
+					Order Book Status : <input type="text"
+						th:field="${orderBook.orderBookStatus}" readonly="readonly" />
+				</p>
+				<p>
+					Order Book Instrument ID: <input type="text"
+						th:field="${orderBook.instrument.instrumentName}"
+						readonly="readonly" />
+				</p>
+				<p>
+					Order Book Execution Status : <input type="text"
+						th:field="${orderBook.executionStatus}" readonly="readonly" />
+				<p>
+					Order Book Created By : <input type="text"
+						th:field="${orderBook.createdBy}" readonly="readonly" />
+				<p>
+					Order Book Created on : <input type="text"
+						th:field="${orderBook.createdOn}" readonly="readonly" />
+				<h3>Order List in the Order Book:</h3>
 				<table border="2" width="70%" cellpadding="2">
 					<tr>
 						<th>Order Count</th>
@@ -76,9 +90,8 @@
 					</tr>
 
 				</table>
-				<br>
-				<br>
-				
+				<br> <br>
+
 				<table border="2" width="70%" cellpadding="2">
 					<tr>
 						<th><b>Order Details</b></th>
@@ -108,12 +121,17 @@
 					</tr>
 				</table>
 
-				<br />  <br>
+				<br /> <br>
 				<p>
-					<button><a th:href="@{'/admin/myorderbook'}">OrderBook List </a></button>
-					<button><a th:href="@{'/orderBookEdit/'+ ${orderBook.orderBookId} }">Back To Order Book</a></button>
-					
-					
+					<button>
+						<a th:href="@{'/admin/myorderbook'}">OrderBook List </a>
+					</button>
+					<button>
+						<a th:href="@{'/orderBookEdit/'+ ${orderBook.orderBookId} }">Back
+							To Order Book</a>
+					</button>
+
+
 				</p>
 			</form>
 

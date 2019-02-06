@@ -44,12 +44,9 @@
 					Book Id : <input type="text" th:field="*{orderBookId}"
 						readonly="readonly" />
 				<p>
-					Book Name : <input type="text" th:field="*{orderBookName}" />
-				</p>
-				<p>
 					Order Book Status : <select th:field="*{orderBookStatus}">
 						<option
-							th:each="bookStatus : ${T(com.cswm.assignment.model.OrderBook.OrderBookStatus).values()}"
+							th:each="bookStatus : ${T(com.cswm.assignment.applicationUtils.OrderBookStatus).values()}"
 							th:value="${bookStatus}" th:text="${bookStatus}"
 							th:selected="*{orderBookStatus}"></option>
 
@@ -57,19 +54,16 @@
 					
 				<p >
 					Order Book Instrument Name: <input type="text"
-						th:field="*{instrument.instrumentName}" th:readonly="${orderBook.orderBookId!=null}" />
+						th:field="*{instrument.instrumentId}" th:readonly="${orderBook.orderBookId!=null}" />
 				</p>
 
-				<p>
-					Order Book Execution Status : <input type="text"
-						th:field="*{executionStatus}" readonly="readonly" />
 				<p>
 					Order Book Created By : <input type="text" th:field="*{createdBy}"
 						readonly="readonly" />
 				<p>
 					Order Book Created on : <input type="text" th:field="*{createdOn}"
 						readonly="readonly" />
-				<h3 th:if="${null!=orderBook.orders and  !orderBook.orders.empty}">Order
+				<%-- <h3 th:if="${null!=orderBook.orders and  !orderBook.orders.empty}">Order
 					List in the Order Book:</h3>
 				<table border="2" width="70%" cellpadding="2"
 					th:if="${null!=orderBook.orders and !orderBook?.orders?.empty}">
@@ -130,7 +124,7 @@
 						<td th:text="${execution.createdOn}" />
 					</tr>
 
-				</table>
+				</table> --%>
 
 				<br /> <br>
 				<p>
@@ -141,8 +135,8 @@
 					</button>
 
 					<button
-						th:if="${orderBook.orderBookStatus == T(com.cswm.assignment.model.OrderBook.OrderBookStatus).CLOSE
-								and orderBook.executionStatus!=T(com.cswm.assignment.model.OrderBook.ExecutionStatus).EXECUTED 
+						th:if="${orderBook.orderBookStatus == T(com.cswm.assignment.applicationUtils.OrderBookStatus).CLOSED
+								and orderBook.executionStatus!=T(com.cswm.assignment.applicationUtils.ExecutionStatus).EXECUTED 
 								and orderBook.orderBookId !=0} ">
 						<a
 							th:href="@{'/addExecutionToOrderBook/'+ ${orderBook.orderBookId}}">Add
@@ -150,7 +144,7 @@
 					</button>
 
 					<button
-						th:if="${orderBook.orderBookStatus == T(com.cswm.assignment.model.OrderBook.OrderBookStatus).OPEN 
+						th:if="${orderBook.orderBookStatus == T(com.cswm.assignment.applicationUtils.OrderBookStatus).OPEN 
 								and orderBook.orderBookId != null} ">
 						<a th:href="@{'/addOrderToOrderBook/'+ ${orderBook.orderBookId}}">Add
 							Order to order Book </a>

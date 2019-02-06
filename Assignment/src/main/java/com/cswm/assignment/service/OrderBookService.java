@@ -8,29 +8,23 @@ import com.cswm.assignment.model.Execution;
 import com.cswm.assignment.model.Order;
 import com.cswm.assignment.model.OrderBook;
 import com.cswm.assignment.modelvos.OrderBookStatsVo;
-import com.cswm.assignment.modelvos.OrderStatsVo;
 
 @Service
 public interface OrderBookService {
 
-	List<OrderBook> getOrderBooks();
+	List<OrderBook> getAllOrderBooks();
 
 	OrderBook getOrderBook(Long orderBookId);
 
-	OrderBook saveBook(OrderBook orderBook);
+	OrderBook createOrderBook(OrderBook orderBook);
 
-	OrderBook addOrderInBook(Long orderBookId, Order order);
+	OrderBook addOrderToOrderBook(Long orderBookId, Order order);
 
-	OrderBook openCloseOrderBook(String orderBookStatus, Long orderBookId);
+	OrderBook closeOrderBook(Long orderBookId);
 
 	OrderBook addExecutionToBook(Long orderBookId, Execution execution);
 
 	OrderBookStatsVo getOrderBookStats(Long orderBookId);
 
-	OrderStatsVo getOrderStats(Long orderBookId, Long orderId);
-
 	OrderBook createDefaultOrderBook();
-
-	OrderBook updateBook(OrderBook orderBook, Long orderBookId);
-
 }

@@ -12,5 +12,4 @@ public interface InstrumentRepository extends JpaRepository<Instrument, Long> {
 
 	Optional<Instrument> findFirstByInstrumentId(Long instrumentId);
 
-	Optional<Instrument> findFirstByInstrumentName(String instrumentId);
 }

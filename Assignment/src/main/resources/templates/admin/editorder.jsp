@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="http://www.thymeleaf.org">
@@ -45,10 +46,6 @@
 						th:field="*{orderBook.orderBookId}" readonly="readonly" />
 				</p>
 
-				<p>
-					Order Book Id : <input type="text"
-						th:field="*{orderBook.orderBookName}" readonly="readonly" />
-				</p>
 
 				<p>
 					Order Id : <input type="text" th:field="*{orderId}"
@@ -73,7 +70,7 @@
 				<p>
 					Order Type : <select th:field="*{orderType}">
 						<option
-							th:each="orderType : ${T(com.cswm.assignment.model.Order.OrderType).values()}"
+							th:each="orderType : ${T(com.cswm.assignment.applicationUtils.OrderType).values()}"
 							th:value="${orderType}" 
 							th:text="${orderType}"
 							th:selected="*{orderType}"></option>

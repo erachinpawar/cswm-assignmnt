@@ -11,11 +11,11 @@ public class ApplicationConfig {
 	public void onShutDown() {
 		System.out.println("Applicatio Shutdown initiated it will be closed in 30 secs ..");
 
-		try {
-			Thread.sleep(30000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			//Thread.sleep(30000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 
 		System.out.println("Application closed now ....");
 	}

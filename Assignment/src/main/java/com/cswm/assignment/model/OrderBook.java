@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.cswm.assignment.applicationUtils.OrderBookStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
@@ -26,21 +27,10 @@ import lombok.Data;
 @Data
 public class OrderBook {
 
-	public enum OrderBookStatus {
-		OPEN, CLOSE
-	}
-
-	public enum ExecutionStatus {
-		EXECUTED, NOT_EXECUTED
-	}
-
 	@Id
 	@Column(name = "order_book_id")
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_book_inv_seq")
 	private Long orderBookId;
-
-	@Column(name = "order_book_name")
-	private String orderBookName;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "instrument_id")
@@ -58,10 +48,6 @@ public class OrderBook {
 	@JsonManagedReference
 	private Set<Order> orders;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "is_book_executed")
-	private ExecutionStatus executionStatus;
-
 	@Column(name = "created_by")
 	private String createdBy;
 
@@ -77,14 +63,6 @@ public class OrderBook {
 
 	public void setOrderBookId(Long orderBookId) {
 		this.orderBookId = orderBookId;
-	}
-
-	public String getOrderBookName() {
-		return orderBookName;
-	}
-
-	public void setOrderBookName(String orderBookName) {
-		this.orderBookName = orderBookName;
 	}
 
 	public Instrument getInstrument() {
@@ -119,14 +97,6 @@ public class OrderBook {
 		this.createdOn = createdOn;
 	}
 
-	public ExecutionStatus getExecutionStatus() {
-		return executionStatus;
-	}
-
-	public void setExecutionStatus(ExecutionStatus executionStatus) {
-		this.executionStatus = executionStatus;
-	}
-
 	public Set<Execution> getExecutions() {
 		return executions;
 	}
@@ -145,10 +115,9 @@ public class OrderBook {
 
 	@Override
 	public String toString() {
-		return "OrderBook [orderBookId=" + orderBookId + ", orderBookName=" + orderBookName + ", instrument="
-				+ instrument + ", orderBookStatus=" + orderBookStatus + ", executions=" + executions + ", orders="
-				+ orders + ", executionStatus=" + executionStatus + ", createdBy=" + createdBy + ", createdOn="
-				+ createdOn + "]";
+		return "OrderBook [orderBookId=" + orderBookId + ", instrument=" + instrument + ", orderBookStatus="
+				+ orderBookStatus + ", executions=" + executions + ", orders=" + orders + ",  createdBy=" + createdBy
+				+ ", createdOn=" + createdOn + "]";
 	}
 
 }

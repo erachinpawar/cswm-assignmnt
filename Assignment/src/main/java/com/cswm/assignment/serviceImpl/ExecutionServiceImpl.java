@@ -16,7 +16,6 @@ import com.cswm.assignment.repository.ExecutionRepository;
 import com.cswm.assignment.service.ExecutionService;
 
 @Service
-@Transactional
 public class ExecutionServiceImpl implements ExecutionService {
 
 	@Autowired
@@ -36,9 +35,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 		if (!orderBook.getExecutions().isEmpty()) {
 			Execution ordBookExec = orderBook.getExecutions().iterator().next();
 			execution.setPrice(ordBookExec.getPrice());
-			execution.setExecutionName(ordBookExec.getExecutionName());
 		} else {
-			execution.setExecutionName("");
 		}
 		execution.setCreatedBy(ApplicationConstants.DEFAULT_USER);
 		execution.setCreatedOn(LocalDateTime.now());

@@ -42,7 +42,6 @@
 				th:object="${execution}" method="post">
 				
 				<p> Book Id : <input type="text" th:field="*{orderBook.orderBookId}" readonly="readonly"/>
-				<p> Book Name : <input type="text" th:field="${orderBook.orderBookName}" readonly="readonly"/></p>
 				<p> Order Book Status :  <input type="text" th:field="${orderBook.orderBookStatus}" readonly="readonly"/></p>
 				<p> Order Book Instrument ID: <input type="text" th:field="${orderBook.instrument.instrumentName}" readonly="readonly"/></p>
 				<p> Order Book Execution Status : <input type="text" th:field="${orderBook.executionStatus}" readonly="readonly" />

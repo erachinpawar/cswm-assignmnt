@@ -1,5 +1,6 @@
 package com.cswm.assignment.modelvos;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import com.cswm.assignment.model.Order;
@@ -28,7 +29,7 @@ public class OrderBookStatsVo {
 	private Long validDemand;
 	private Long invalidDemand;
 	private Long executionQty;
-	private Double executionPrice;
+	private BigDecimal executionPrice;
 
 	private OrderBook orderBook;
 
@@ -95,11 +96,11 @@ public class OrderBookStatsVo {
 		return this;
 	}
 
-	public Double getExecutionPrice() {
+	public BigDecimal getExecutionPrice() {
 		return executionPrice;
 	}
 
-	public OrderBookStatsVo setExecutionPrice(Double executionPrice) {
+	public OrderBookStatsVo setExecutionPrice(BigDecimal executionPrice) {
 		this.executionPrice = executionPrice;
 		return this;
 	}

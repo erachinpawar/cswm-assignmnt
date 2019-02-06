@@ -15,8 +15,8 @@ import com.cswm.assignment.ApplicationConstants;
 import com.cswm.assignment.controller.OrderBookController;
 import com.cswm.assignment.model.Execution;
 import com.cswm.assignment.model.Order;
-import com.cswm.assignment.model.Order.OrderBuilder;
 import com.cswm.assignment.model.OrderBook;
+import com.cswm.assignment.model.dto.OrderBuilder;
 import com.cswm.assignment.modelvos.OrderBookStatsVo;
 import com.cswm.assignment.modelvos.OrderStatsVo;
 import com.cswm.assignment.service.ExecutionService;
@@ -59,7 +59,7 @@ public class ViewController {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("admin/myorderbook");
 		modelAndView.addObject("userName", "Welcome " + ApplicationConstants.DEFAULT_USER);
-		List<OrderBook> orderBooks = orderBookController.getOrderBooks();
+		List<OrderBook> orderBooks = orderBookController.getAllOrderBooks();
 		modelAndView.addObject("orderBooks", orderBooks);
 		modelAndView.addObject("adminMessage", "Orders Inventory");
 		return modelAndView;
@@ -89,24 +89,17 @@ public class ViewController {
 
 	@RequestMapping(value = "/orderBookClose/{orderBookId}", method = RequestMethod.GET)
 	public String closeOrderBook(@PathVariable long orderBookId) {
-		orderBookController.openCloseOrderBook(orderBookId,"close");
+		orderBookController.closeOrderBook(orderBookId);
 		return "redirect:/admin/myorderbook";
 	}
 
-	@RequestMapping(value = "/orderBookOpen/{orderBookId}", method = RequestMethod.GET)
-	public String openOrderBook(@PathVariable long orderBookId) {
-		orderBookController.openCloseOrderBook(orderBookId,"open");
-		return "redirect:/admin/myorderbook";
-	}
 
 	@RequestMapping(value = "/saveOrderBook", method = RequestMethod.POST)
-	public String saveOrderBook(OrderBook orderBook, BindingResult bindingResult) {
+	public String saveOrderBook(OrderBook orderBook) {
 		orderBook.setCreatedBy(ApplicationConstants.DEFAULT_USER);
 		orderBook.setCreatedOn(LocalDateTime.now());
 		if (null == orderBook.getOrderBookId())
 			orderBookController.createOrderBook(orderBook);
-		else
-			orderBookController.updateOrderBook(orderBook, orderBook.getOrderBookId());
 		return "redirect:/admin/myorderbook";
 	}
 

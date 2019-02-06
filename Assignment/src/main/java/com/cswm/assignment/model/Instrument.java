@@ -21,20 +21,13 @@ public class Instrument {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "instruments_seq")
 	private Long instrumentId;
 
-	@Column(name = "instrument_name")
-	private String instrumentName;
-
 	@Column(name = "created_by")
 	private String createdBy;
 
 	@Column(name = "created_on")
 	private LocalDateTime createdOn;
 
-	public Instrument() {	}
-
-	
-	public Instrument(String instrumentName) {
-		this.instrumentName=instrumentName;
+	public Instrument() {
 	}
 
 	public Long getInstrumentId() {
@@ -43,14 +36,6 @@ public class Instrument {
 
 	public void setInstrumentId(Long instrumentId) {
 		this.instrumentId = instrumentId;
-	}
-
-	public String getInstrumentName() {
-		return instrumentName;
-	}
-
-	public void setInstrumentName(String instrumentName) {
-		this.instrumentName = instrumentName;
 	}
 
 	public String getCreatedBy() {
@@ -71,8 +56,8 @@ public class Instrument {
 
 	@Override
 	public String toString() {
-		return "refInstruments [refInstrumentId=" + instrumentId + ", instrumentName=" + instrumentName
-				+ ",  createdBy=" + createdBy + ", createdOn=" + createdOn + "]";
+		return "refInstruments [refInstrumentId=" + instrumentId + ",  createdBy=" + createdBy + ", createdOn="
+				+ createdOn + "]";
 	}
 
 }

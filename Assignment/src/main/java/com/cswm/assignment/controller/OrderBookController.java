@@ -14,65 +14,75 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.cswm.assignment.UrlConstants;
 import com.cswm.assignment.model.Execution;
 import com.cswm.assignment.model.Order;
 import com.cswm.assignment.model.OrderBook;
 import com.cswm.assignment.modelvos.OrderBookStatsVo;
 import com.cswm.assignment.modelvos.OrderStatsVo;
 import com.cswm.assignment.service.OrderBookService;
+import com.cswm.assignment.service.OrderService;
 
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 @Controller
 @RequestMapping("/orderbooks")
 public class OrderBookController {
 
 	@Autowired
 	OrderBookService orderBookService;
+	@Autowired
+	private OrderService orderService;
 
-	@RequestMapping(value = "", method = RequestMethod.GET)
-	public @ResponseBody List<OrderBook> getOrderBooks() {
-		return orderBookService.getOrderBooks();
+	@RequestMapping(value = UrlConstants.URL_ALL_ORDER_BOOKS, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody List<OrderBook> getAllOrderBooks() {
+		return orderBookService.getAllOrderBooks();
 	}
 
-	@RequestMapping(value = "/{orderBookId}", method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
 	public @ResponseBody OrderBook getOrderBook(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBook(orderBookId);
 	}
-	
-	@RequestMapping(value="/{orderBookId}/orderBookstats", method = RequestMethod.GET)
+
+	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_STATISTICS, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
 	public @ResponseBody OrderBookStatsVo getOrderBookStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookStats(orderBookId);
 	}
 
-	@RequestMapping(value = "/{orderBookId}/orders/{orderId}/orderStats", method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstants.URL_GET_ORDER_STATISTICS, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
 	public @ResponseBody OrderStatsVo getOrderStats(@PathVariable Long orderBookId, @PathVariable Long orderId) {
-		return orderBookService.getOrderStats(orderBookId, orderId);
+		return orderService.getOrderStats(orderId);
 	}
 
-	@RequestMapping(value = "", method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstants.URL_CREATE_ORDER_BOOK, method = RequestMethod.POST)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public @ResponseBody OrderBook createOrderBook(@RequestBody OrderBook orderBook) {
-		return orderBookService.saveBook(orderBook);
+		return orderBookService.createOrderBook(orderBook);
 	}
 
-	@RequestMapping(value="/{orderBookId}/orders", method=RequestMethod.PUT)
+	@RequestMapping(value = UrlConstants.URL_ADD_ORDER_BOOK, method = RequestMethod.PUT)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public @ResponseBody OrderBook addOrderToOrderBook(@RequestBody Order order, @PathVariable Long orderBookId) {
-		return orderBookService.addOrderInBook(orderBookId, order);
+		return orderBookService.addOrderToOrderBook(orderBookId, order);
 	}
 
-	@RequestMapping(value="/{orderBookId}/orderBookStatus/{orderBookStatus}", method=RequestMethod.PUT)
-	public @ResponseBody OrderBook openCloseOrderBook(@PathVariable Long orderBookId, @PathVariable String orderBookStatus) {
-		return orderBookService.openCloseOrderBook(orderBookStatus, orderBookId);
+	@RequestMapping(value = UrlConstants.URL_CLOSE_ORDER_BOOK, method = RequestMethod.PUT)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBook closeOrderBook(@PathVariable Long orderBookId) {
+		return orderBookService.closeOrderBook(orderBookId);
 	}
 
-	@RequestMapping(value="/{orderBookId}/executions", method=RequestMethod.PUT)
-	public @ResponseBody OrderBook addExecutionToBook(@PathVariable Long orderBookId, @RequestBody Execution execution) {
+	@RequestMapping(value = UrlConstants.URL_EXECUTE_ORDER_BOOK, method = RequestMethod.PUT)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBook addExecutionToBook(@PathVariable Long orderBookId,
+			@RequestBody Execution execution) {
 		return orderBookService.addExecutionToBook(orderBookId, execution);
 	}
-	
-	@RequestMapping(value="/{orderBookId}", method=RequestMethod.PUT)
-	public OrderBook updateOrderBook(@RequestBody OrderBook orderBook, @PathVariable Long orderBookId) {
-		return orderBookService.updateBook(orderBook, orderBookId);
-	}
-	
+
 }

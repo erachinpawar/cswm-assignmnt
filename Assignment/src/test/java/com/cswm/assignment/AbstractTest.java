@@ -14,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.cswm.assignment.model.Instrument;
 import com.cswm.assignment.service.ExecutionService;
 import com.cswm.assignment.service.InstrumentService;
 import com.cswm.assignment.service.OrderBookService;
@@ -46,7 +45,6 @@ public class AbstractTest {
 	@Before
 	public void setUp() {
 		this.mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-		instrumentService.addInstrument(new Instrument("Instrument-1"));
 	}
 
 	protected String mapToJson(Object obj) throws JsonProcessingException {

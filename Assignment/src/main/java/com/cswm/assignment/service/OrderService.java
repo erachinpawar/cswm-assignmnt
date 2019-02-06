@@ -12,24 +12,9 @@ import com.cswm.assignment.modelvos.OrderStatsVo;
 @Service
 public interface OrderService {
 
-	OrderBook addOrderInBook(Order order, OrderBook orderBook);
+	OrderStatsVo getOrderStats(Long orderId);
 
 	List<Order> getValidOrders(OrderBook orderBook, Execution execution);
-
-	Long getAccOrdersFromValidOrders(List<Order> validOrders);
-
-	Long getTotExecQtyValidOrders(List<Order> validOrders);
-
-	
-	Order getBiggestOrderForBook(OrderBook orderBook);
-
-	Order getSmallestOrderForBook(OrderBook orderBook);
-
-	Order getEarliestOrderInBook(OrderBook orderBook);
-
-	Order getLatestOrderInBook(OrderBook orderBook);
-
-	OrderStatsVo getOrderStats(Long orderId);
 
 	List<Order> addExecutionQuantityToOrders(List<Order> validOrders, Long accumltdOrders, Long effectiveQuanty);
 }

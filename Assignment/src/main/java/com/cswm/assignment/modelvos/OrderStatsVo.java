@@ -1,7 +1,9 @@
 package com.cswm.assignment.modelvos;
 
+import java.math.BigDecimal;
+
+import com.cswm.assignment.applicationUtils.OrderStatus;
 import com.cswm.assignment.model.Order;
-import com.cswm.assignment.model.Order.OrderStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +19,7 @@ public class OrderStatsVo {
 
 
 	private Order order;
-	private Double executionPrice;
+	private BigDecimal executionPrice;
 	private OrderStatus orderStatus;
 	
 	public Order getOrder() {
@@ -26,10 +28,10 @@ public class OrderStatsVo {
 	public void setOrder(Order order) {
 		this.order = order;
 	}
-	public Double getExecutionPrice() {
+	public BigDecimal getExecutionPrice() {
 		return executionPrice;
 	}
-	public void setExecutionPrice(Double executionPrice) {
+	public void setExecutionPrice(BigDecimal executionPrice) {
 		this.executionPrice = executionPrice;
 	}
 	
