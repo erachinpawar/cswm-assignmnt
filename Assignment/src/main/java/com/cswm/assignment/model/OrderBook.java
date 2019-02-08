@@ -1,6 +1,6 @@
 package com.cswm.assignment.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -17,40 +17,30 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
+import com.cswm.assignment.applicationutils.OrderBookStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 @Entity
+@ApiModel
 @Table(name = "order_book_inv")
 @Data
 public class OrderBook {
-
-	public enum OrderBookStatus {
-		OPEN, CLOSED
-	}
-
-	public enum ExecutionStatus {
-		EXECUTED, NOT_EXECUTED
-	}
 
 	@Id
 	@Column(name = "order_book_id")
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_book_inv_seq")
 	private Long orderBookId;
 
-	@Column(name = "order_book_name")
-	private String orderBookName;
-
-	@OneToOne(cascade=CascadeType.ALL)
+	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "instrument_id")
 	private Instrument instrument;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "order_Book_Status", length = 20)
-	private OrderBookStatus orderBookStatus;;
+	private OrderBookStatus orderBookStatus;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "orderBook", cascade = CascadeType.ALL)
 	@JsonManagedReference
@@ -60,19 +50,12 @@ public class OrderBook {
 	@JsonManagedReference
 	private Set<Order> orders;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "is_book_executed")
-	private ExecutionStatus executionStatus;
-
 	@Column(name = "created_by")
 	private String createdBy;
 
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Column(name = "created_on")
-	private Date createdOn;
+	private LocalDateTime createdOn;
 
-	
-	
 	public OrderBook() {
 	}
 
@@ -82,14 +65,6 @@ public class OrderBook {
 
 	public void setOrderBookId(Long orderBookId) {
 		this.orderBookId = orderBookId;
-	}
-
-	public String getOrderBookName() {
-		return orderBookName;
-	}
-
-	public void setOrderBookName(String orderBookName) {
-		this.orderBookName = orderBookName;
 	}
 
 	public Instrument getInstrument() {
@@ -116,23 +91,12 @@ public class OrderBook {
 		this.createdBy = createdBy;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDateTime getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(LocalDateTime createdOn) {
 		this.createdOn = createdOn;
-	}
-
-
-	
-
-	public ExecutionStatus getExecutionStatus() {
-		return executionStatus;
-	}
-
-	public void setExecutionStatus(ExecutionStatus executionStatus) {
-		this.executionStatus = executionStatus;
 	}
 
 	public Set<Execution> getExecutions() {
@@ -153,10 +117,9 @@ public class OrderBook {
 
 	@Override
 	public String toString() {
-		return "OrderBook [orderBookId=" + orderBookId + ", orderBookName=" + orderBookName + ", instrument="
-				+ instrument + ", orderBookStatus=" + orderBookStatus + ", executions=" + executions + ", orders="
-				+ orders + ", executionStatus=" + executionStatus + ", createdBy=" + createdBy + ", createdOn="
-				+ createdOn + "]";
+		return "OrderBook [orderBookId=" + orderBookId + ", instrument=" + instrument + ", orderBookStatus="
+				+ orderBookStatus + ", executions=" + executions + ", orders=" + orders + ",  createdBy=" + createdBy
+				+ ", createdOn=" + createdOn + "]";
 	}
 
 }

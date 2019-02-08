@@ -1,7 +1,7 @@
 package com.cswm.assignment.model;
 
-
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import org.hibernate.annotations.ColumnDefault;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -26,26 +26,24 @@ public class Execution {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_seq")
 	private Long executionId;
 
-	@Column(name = "execution_name")
-	private String executionName;
-
 	@Column(name = "price")
-	private Double price;
+	@ColumnDefault("0")
+	private BigDecimal price; 
 
 	@Column(name = "qty")
+	@ColumnDefault("0")
 	private Long quantity;
 
 	@ManyToOne(fetch = FetchType.EAGER, optional = true)
 	@JoinColumn(name = "order_book_id", nullable = false)
 	@JsonBackReference
 	private OrderBook orderBook;
-	
+
 	@Column(name = "created_by")
 	private String createdBy;
 
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	@Column(name = "created_on")
-	private Date createdOn;
+	private LocalDateTime createdOn;
 
 	public Execution() {
 	}
@@ -58,19 +56,11 @@ public class Execution {
 		this.executionId = executionId;
 	}
 
-	public String getExecutionName() {
-		return executionName;
-	}
-
-	public void setExecutionName(String executionName) {
-		this.executionName = executionName;
-	}
-
-	public Double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(Double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -98,19 +88,18 @@ public class Execution {
 		this.createdBy = createdBy;
 	}
 
-	public Date getCreatedOn() {
+	public LocalDateTime getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(LocalDateTime createdOn) {
 		this.createdOn = createdOn;
 	}
 
 	@Override
 	public String toString() {
-		return "Execution [executionId=" + executionId + ", executionName=" + executionName + ", price=" + price
-				+ ", quantity=" + quantity + ", createdBy=" + createdBy + ", createdOn="
-				+ createdOn + "]";
+		return "Execution [executionId=" + executionId + ",  price=" + price + ", quantity=" + quantity + ", createdBy="
+				+ createdBy + ", createdOn=" + createdOn + "]";
 	}
 
 }

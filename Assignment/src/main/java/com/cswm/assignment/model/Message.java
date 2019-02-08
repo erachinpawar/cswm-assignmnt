@@ -1,6 +1,6 @@
 package com.cswm.assignment.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -10,16 +10,15 @@ public class Message {
 
 	private HttpStatus errorCode;
     private String message;
-    private Date created;
+    private LocalDateTime created;
     
     public Message() {
-    	
     }
     
     public Message(HttpStatus id, String message) {
     	this.errorCode = id;
     	this.message = message;
-    	this.created = new Date();
+    	this.created = LocalDateTime.now();
     }
     
 	public HttpStatus getId() {
@@ -34,10 +33,10 @@ public class Message {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public Date getCreated() {
+	public LocalDateTime getCreated() {
 		return created;
 	}
-	public void setCreated(Date created) {
+	public void setCreated(LocalDateTime created) {
 		this.created = created;
 	}
 	

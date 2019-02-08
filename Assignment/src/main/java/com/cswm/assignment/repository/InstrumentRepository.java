@@ -7,11 +7,12 @@ import org.springframework.stereotype.Repository;
 
 import com.cswm.assignment.model.Instrument;
 
+
 @Repository
 public interface InstrumentRepository extends JpaRepository<Instrument, Long> {
 
-	Optional<Instrument> findFirstByInstrumentId(Long instrumentid);
+	Optional<Instrument> findFirstByInstrumentId(Long instrumentId);
 
-	Instrument deleteByInstrumentId(Long refInstrumentId);
+	Instrument findFirstByInstrumentName(String instrumentName);
 
 }

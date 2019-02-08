@@ -1,6 +1,6 @@
 package com.cswm.assignment.exceptions;
 
-import com.cswm.assignment.applicationUtils.ErrorMessageEnum;
+import com.cswm.assignment.applicationutils.ErrorMessageEnum;
 
 public class ApplicationException extends RuntimeException{
 

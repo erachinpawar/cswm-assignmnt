@@ -1,35 +1,31 @@
 package com.cswm.assignment.serviceImpl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import javax.transaction.Transactional;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cswm.assignment.ApplicationConstants;
-import com.cswm.assignment.applicationUtils.ErrorMessageEnum;
-import com.cswm.assignment.exceptions.ApplicationException;
+import com.cswm.assignment.applicationutils.ErrorMessageEnum;
+import com.cswm.assignment.applicationutils.OrderStatus;
+import com.cswm.assignment.applicationutils.OrderType;
 import com.cswm.assignment.exceptions.NotFoundException;
 import com.cswm.assignment.model.Execution;
-import com.cswm.assignment.model.Instrument;
 import com.cswm.assignment.model.Order;
-import com.cswm.assignment.model.Order.OrderStatus;
-import com.cswm.assignment.model.Order.OrderType;
-import com.cswm.assignment.model.OrderBook;
-import com.cswm.assignment.modelvos.OrderStatsVo;
+import com.cswm.assignment.model.OrderBuilder;
+import com.cswm.assignment.model.dto.ExecutionDto;
+import com.cswm.assignment.model.dto.OrderBookDto;
+import com.cswm.assignment.model.dto.OrderBuilderDto;
+import com.cswm.assignment.model.dto.OrderDto;
+import com.cswm.assignment.model.dto.OrderStatisticsDto;
 import com.cswm.assignment.repository.OrderRepository;
 import com.cswm.assignment.service.OrderBookService;
 import com.cswm.assignment.service.OrderService;
 
 @Service
-@Transactional
 public class OrderServiceImpl implements OrderService {
 
 	@Autowired
@@ -39,198 +35,119 @@ public class OrderServiceImpl implements OrderService {
 	OrderBookService orderBookService;
 
 	@Override
-	public List<Order> getAllOrders() {
-		return (List<Order>) orderRepository.findAll();
+	public List<OrderDto> getValidOrders(OrderBookDto orderBookDto, ExecutionDto executionDto) {
+		BigDecimal executionPrice = CollectionUtils.isEmpty(orderBookDto.getExecutions())
+				? (null != executionDto ? executionDto.getPrice() : BigDecimal.ZERO)
+				: orderBookDto.getExecutions().iterator().next().getPrice();
+		List<OrderDto> validOrdersDtos = new ArrayList<OrderDto>();
 
-	}
+		for (OrderDto orderDto : orderBookDto.getOrders()) {
+			if (orderDto.getOrderDetails().getOrderType().equals(OrderType.MARKET_ORDER))
+				validOrdersDtos.add(orderDto);
+			else if ((executionPrice
+					.compareTo(null == orderDto.getOrderprice() ? BigDecimal.ZERO : orderDto.getOrderprice()) == -1
+					&& orderDto.getOrderDetails().getOrderType() == OrderType.LIMIT_ORDER))
+				validOrdersDtos.add(orderDto);
 
-	@Override
-	public List<Order> getOrdersByOrderBook(Long orderBookId) {
-		return (List<Order>) orderRepository.findAllByOrderBook(orderBookService.getOrderBook(orderBookId));
-
-	}
-
-	@Override
-	public Order getOrderByOrderBook(Long orderBookId, Long orderId) {
-
-		return orderRepository.findFirstByOrderBookAndOrderId(orderBookService.getOrderBook(orderBookId), orderId)
-				.orElseThrow(() -> new NotFoundException(ErrorMessageEnum.ORDER_NOT_FOUND_FOR_BOOK));
-	}
-
-	@Override
-	public OrderBook addOrderInBook(Order order, OrderBook orderBook) {
-
-		switch (orderBook.getOrderBookStatus()) {
-		case CLOSED:
-			throw new ApplicationException(ErrorMessageEnum.ADD_ORDER_ORDERBOOK_CLOSED);
-		case OPEN:
-			return performAddOfOrderToBook(orderBook, order);
-		default:
-			throw new ApplicationException(ErrorMessageEnum.ADD_ORDER_ORDERBOOK_STATUS_UNKNOWN);
 		}
+
+		return validOrdersDtos;
 	}
 
-	private OrderBook performAddOfOrderToBook(OrderBook orderBook, Order order) {
-		validateOrder(order, orderBook);
-		Order newOrder = new Order(orderBook, ApplicationConstants.DEFAULT_USER, new Date(), order);
-		Set<Order> orders = CollectionUtils.isEmpty(orderBook.getOrders()) ? new HashSet<>() : orderBook.getOrders();
-		orders.add(newOrder);
-		return orderBook;
-	}
-
-	private void validateOrder(Order order, OrderBook orderBook) {
-
-		if (null == order.getOrderName() || order.getOrderName().isEmpty())
-			throw new ApplicationException(ErrorMessageEnum.ORDER_NAME_INVALID);
-		if (!orderBook.getInstrument().getInstrumentId().equals(order.getInstrument().getInstrumentId()))
-			throw new ApplicationException(ErrorMessageEnum.ORDER_NOT_BELONG_TO_INSTRUMENT);
-		if (null == order.getOrderQuantity() || order.getOrderQuantity() <= 0l)
-			throw new ApplicationException(ErrorMessageEnum.ORDER_QUANTITY_INVALID);
-		if (null == order.getOrderprice() || order.getOrderprice() <= 0d)
-			throw new ApplicationException(ErrorMessageEnum.ORDER_PRICE_INVALID);
-		if (null == order.getOrderType())
-			throw new ApplicationException(ErrorMessageEnum.ORDER_TYPE_INVALID);
-
-	}
-
-	@Override
-	public void removeOrderFromBook(Long orderBookId, Long orderId) {
-		throw new ApplicationException(ErrorMessageEnum.REMOVE_ORDER_ORDERBOOK);
-	}
-
-	@Override
-	public Order getOrder(Long orderId) {
-		return orderRepository.findFirstByOrderId(orderId)
-				.orElseThrow(() -> new NotFoundException(ErrorMessageEnum.ORDER_NOT_FOUND));
-	}
-
-	@Override
-	public Order deleteOrder(Long orderId) {
-		Order order = getOrder(orderId);
-		if (order != null) {
-			if (null != order.getOrderBook())
-				throw new ApplicationException(ErrorMessageEnum.REMOVE_ORDER_ORDERBOOK_CLOSED);
-			orderRepository.delete(order);
-		}
-		return order;
-	}
-
-	@Override
-	public Collection<Order> getOrdersByInstruments(Instrument instrument) {
-		return orderRepository.findAllByInstrument(instrument);
-	}
-
-	@Override
-	public List<Order> getValidOrders(OrderBook orderBook, Execution execution) {
-		List<Order> allOrdersForBook = orderRepository.findAllByOrderBook(orderBook);
-		Double executionPrice = CollectionUtils.isEmpty(orderBook.getExecutions())
-				? (null != execution ? execution.getPrice() : 0d)
-				: orderBook.getExecutions().iterator().next().getPrice();
-		// if first execution execution price from them
-		List<Order> validOrders = new ArrayList<Order>();
-		allOrdersForBook.forEach(order -> {
-			if (((null == order.getOrderprice() ? 0.0d : order.getOrderprice()) < executionPrice
-					&& order.getOrderType() == OrderType.LIMIT_ORDER)
-					|| order.getOrderType() == OrderType.MARKET_ORDER) {
-				validOrders.add(order);
-			}
-		});
-
+	private List<OrderDto> sortOrders(List<OrderDto> validOrders) {
+		validOrders.sort((a, b) -> Long.compare(
+				(long) (null == a.getOrderDetails().getExecutionQuantity() ? 0.0
+						: a.getOrderDetails().getExecutionQuantity()),
+				(long) (null == b.getOrderDetails().getExecutionQuantity() ? 0.0
+						: b.getOrderDetails().getExecutionQuantity())));
 		return validOrders;
 	}
 
 	@Override
-	public Long getAccOrdersFromValidOrders(List<Order> validOrders) {
-		Long accOrderQuant = 0l;
-		for (Order order : validOrders) {
-			accOrderQuant = accOrderQuant + order.getOrderQuantity();
+	public synchronized List<OrderDto> addExecutionQuantityToOrders(List<OrderDto> validOrdersDtos, Long accumltdOrders,
+			Long effectiveQuanty) {
+		List<OrderDto> updatedValidOrderDtos = new ArrayList<>();
+		Long addedExecution = 0l;
+		Long updatedToavalidOrder = updateTotalValidOrders(accumltdOrders, validOrdersDtos);
+		for (OrderDto orderDto : validOrdersDtos) {
+			OrderBuilderDto orderBuilderDto = new OrderBuilderDto(orderDto);
+			Long proRataQtyForOrder = (long) (orderDto.getOrderQuantity() * effectiveQuanty) / updatedToavalidOrder;
+			Long updatedExecutiontQty = (null == orderDto.getOrderDetails().getExecutionQuantity() ? 0
+					: orderDto.getOrderDetails().getExecutionQuantity()) + proRataQtyForOrder;
+			if (updatedExecutiontQty >= orderBuilderDto.getOrderQuantity()) {
+				addedExecution = addedExecution + orderBuilderDto.getOrderQuantity()
+						- orderDto.getOrderDetails().getExecutionQuantity();
+				orderBuilderDto.getOrderDetails().setExecutionQuantity(orderBuilderDto.getOrderQuantity());
+			} else {
+				orderBuilderDto.getOrderDetails().setExecutionQuantity(updatedExecutiontQty);
+				addedExecution = addedExecution + proRataQtyForOrder;
+			}
+
+			updatedValidOrderDtos.add(new OrderDto(orderBuilderDto));
 		}
-
-		return accOrderQuant;
-		// validOrders.stream().mapToInt(o -> o.getOrderQuantity()).sum();
-	}
-
-	@Override
-	public double getTotExecQtyValidOrders(List<Order> validOrders) {
-
-		double totExecQtyValidOrder = 0;
-		for (Order order : validOrders) {
-			totExecQtyValidOrder += (null == order.getExecutionQuantity() ? 0 : order.getExecutionQuantity());
+		System.out.println("Difference  in the excuted qty :::: " + (effectiveQuanty - addedExecution));
+		sortOrders(updatedValidOrderDtos);
+		updatedValidOrderDtos = completeDeltaQty(addedExecution, effectiveQuanty, updatedValidOrderDtos);
+		for (OrderDto orderDto : updatedValidOrderDtos) {
+			OrderBuilder orderBuilder = new ModelMapper().map(new OrderBuilderDto(orderDto), OrderBuilder.class);
+			Order order = new Order(orderBuilder);
+			orderRepository.save(order);
 		}
-
-		return totExecQtyValidOrder;
-		// validOrders.stream().mapToDouble(o -> o.getExecutionQuantity()).sum();
+		return updatedValidOrderDtos;
 	}
 
-	@Override
-	public List<Order> addExecutionQuantityToOrders(List<Order> validOrders, Double perOrderExec) {
-
-		List<Order> updatedValidOrders = new ArrayList<>();
-		for (Order order : validOrders) {
-			double updatedExecutiontQty = (null == order.getExecutionQuantity() ? 0 : order.getExecutionQuantity())
-					+ (order.getOrderQuantity() * perOrderExec);
-			updatedValidOrders.add(new Order(order, updatedExecutiontQty));
+	private Long updateTotalValidOrders(Long accumltdOrders, List<OrderDto> validOrdersDtos) {
+		for (OrderDto orderDto : validOrdersDtos) {
+			if (orderDto.getOrderDetails().getExecutionQuantity() >= orderDto.getOrderQuantity())
+				accumltdOrders = accumltdOrders - orderDto.getOrderQuantity();
 		}
-		return updatedValidOrders;
+		return accumltdOrders;
 	}
 
-	@Override
-	public Order getBiggestOrderForBook(OrderBook orderBook) {
+	private List<OrderDto> completeDeltaQty(Long addedExecution, Long effectiveQuanty, List<OrderDto> updatedValidOrderDtos) {
 
-		return orderRepository.findFirstByOrderBookOrderByOrderQuantityDesc(orderBook);
-	}
-
-	@Override
-	public Order getSmallestOrderForBook(OrderBook orderBook) {
-		return orderRepository.findFirstByOrderBookOrderByOrderQuantityAsc(orderBook);
-	}
-
-	@Override
-	public Order getEarliestOrderInBook(OrderBook orderBook) {
-		return orderRepository.findFirstByOrderBookOrderByCreatedOnAsc(orderBook);
-	}
-
-	@Override
-	public Order getLatestOrderInBook(OrderBook orderBook) {
-		return orderRepository.findFirstByOrderBookOrderByCreatedOnDesc(orderBook);
-	}
-
-	@Override
-	public OrderStatsVo getOrderStats(Long orderId) {
-		OrderStatsVo orderStatsVo = new OrderStatsVo();
-		orderStatsVo.setOrder(getOrder(orderId));
-		orderStatsVo.setOrderStatus(getOrderStatus(orderStatsVo.getOrder()));
-		orderStatsVo.setExecutionPrice(getTotalExecutionPrice(orderStatsVo.getOrder()));
-		return orderStatsVo;
-	}
-
-	private double getTotalExecutionPrice(Order order) {
-		if (null == order.getOrderBook() || order.getOrderBook().getExecutions().isEmpty()) {
-			return 0;
-		} else {
-			Execution execution = order.getOrderBook().getExecutions().iterator().next();
-			return (null == order.getExecutionQuantity() ? 0 : order.getExecutionQuantity()) * execution.getPrice();
-		}
-	}
-
-	private OrderStatus getOrderStatus(Order order) {
-		if (null == order.getOrderBook() || order.getOrderBook().getExecutions().isEmpty()) {
-			return OrderStatus.NO_EXECUTION_ON_BOOK_YET;
-		} else if (OrderType.MARKET_ORDER == order.getOrderType()) {
-			return OrderStatus.VALID;
-		} else {
-			Execution execution = order.getOrderBook().getExecutions().iterator().next();
-			if (order.getOrderprice() < execution.getPrice()) {
-				return OrderStatus.INVALID;
+		List<OrderDto> updatedValidOrderList = new ArrayList<>();
+		for (OrderDto orderDto : updatedValidOrderDtos) {
+			if (addedExecution.equals(effectiveQuanty) || ((!addedExecution.equals(effectiveQuanty)) && (orderDto
+					.getOrderQuantity().longValue() <= orderDto.getOrderDetails().getExecutionQuantity().longValue()))) {
+				updatedValidOrderList.add(orderDto);
+			} else {
+				OrderBuilderDto orderBuilderDto = new OrderBuilderDto(orderDto);
+				orderBuilderDto.getOrderDetails()
+						.setExecutionQuantity(orderBuilderDto.getOrderDetails().getExecutionQuantity() + 1);
+				updatedValidOrderList.add(new OrderDto(orderBuilderDto));
+				addedExecution = addedExecution + 1;
 			}
 		}
-		return OrderStatus.VALID;
+
+		return updatedValidOrderList;
 	}
 
 	@Override
-	public Set<Order> getOrdersFromDBforBook(Long orderBookId) {
-
-		return orderRepository.getByOrderBookID(orderBookId);
+	public OrderStatisticsDto getOrderStats(Long orderId) {
+		OrderStatisticsDto orderStatsVo = new OrderStatisticsDto();
+		Order order = orderRepository.findFirstByOrderId(orderId)
+				.orElseThrow(() -> new NotFoundException(ErrorMessageEnum.ORDER_NOT_FOUND));
+		orderStatsVo.setOrder(new ModelMapper().map(order, com.cswm.assignment.model.dto.OrderDto.class));
+		if (CollectionUtils.isEmpty(order.getOrderBook().getExecutions())) {
+			orderStatsVo.setOrderStatus(OrderStatus.ORDER_PLACED);
+			orderStatsVo.setExecutionPrice(BigDecimal.ZERO);
+		} else if (order.getOrderDetails().getOrderType().equals(OrderType.MARKET_ORDER)) {
+			orderStatsVo.setOrderStatus(OrderStatus.VALID);
+		} else if ((null == order.getOrderprice() ? BigDecimal.ZERO : order.getOrderprice())
+				.compareTo(order.getOrderBook().getExecutions().iterator().next().getPrice()) == -1
+				&& order.getOrderDetails().getOrderType().equals(OrderType.LIMIT_ORDER))
+			orderStatsVo.setOrderStatus(OrderStatus.INVALID);
+		else {
+			orderStatsVo.setOrderStatus(OrderStatus.VALID);
+		}
+		if (!CollectionUtils.isEmpty(order.getOrderBook().getExecutions())) {
+			Execution execution = order.getOrderBook().getExecutions().iterator().next();
+			orderStatsVo.setExecutionPrice((null == order.getOrderDetails().getExecutionQuantity() ? BigDecimal.ZERO
+					: BigDecimal.valueOf(order.getOrderDetails().getExecutionQuantity()))
+							.multiply(execution.getPrice()));
+		}
+		return orderStatsVo;
 	}
 
 }

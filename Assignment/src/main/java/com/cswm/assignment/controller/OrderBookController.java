@@ -4,111 +4,130 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
-import javax.ws.rs.container.ResourceContext;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContextException;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.cswm.assignment.applicationUtils.ErrorMessageEnum;
+import com.cswm.assignment.ApplicationConstants;
+import com.cswm.assignment.UrlConstants;
+import com.cswm.assignment.applicationutils.ErrorMessageEnum;
+import com.cswm.assignment.applicationutils.OrderBookStatus;
 import com.cswm.assignment.exceptions.ApplicationException;
-import com.cswm.assignment.model.Execution;
-import com.cswm.assignment.model.Order;
-import com.cswm.assignment.model.OrderBook;
-import com.cswm.assignment.modelvos.OrderBookStatsVo;
+import com.cswm.assignment.model.dto.ExecutionDto;
+import com.cswm.assignment.model.dto.OrderBookDto;
+import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
+import com.cswm.assignment.model.dto.OrderDto;
+import com.cswm.assignment.model.dto.OrderStatisticsDto;
 import com.cswm.assignment.service.OrderBookService;
 import com.cswm.assignment.service.OrderService;
 
-@RestController
-@RequestMapping("/orderbooks")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
+@Controller
 public class OrderBookController {
 
 	@Autowired
 	OrderBookService orderBookService;
-
 	@Autowired
-	OrderService orderService;
+	private OrderService orderService;
 
-	@Context
-	private ResourceContext resourceContext;
-
-	@GetMapping
-	public List<OrderBook> getOrderBooks() {
-		return orderBookService.getOrderBooks();
+	
+	/*
+	 * Used to get the all the order books in the system
+	 * URI : /orderbooks
+	 */
+	@RequestMapping(value = UrlConstants.URL_ALL_ORDER_BOOKS, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody List<OrderBookDto> getAllOrderBooks() {
+		return orderBookService.getAllOrderBooks();
 	}
 
-	@GetMapping("/{id}")
-	public OrderBook getOrderBook(@PathVariable Long id) {
-		return orderBookService.getOrderBook(id);
+	/*
+	 * Used to get a order book
+	 * URI : /orderbooks/{orderBookId}
+	 */
+	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBookDto getOrderBook(@PathVariable Long orderBookId) {
+		return orderBookService.getOrderBook(orderBookId);
 	}
 
-	@GetMapping("/{orderBookId}/orderBookstats")
-	public OrderBookStatsVo getOrderBookStats(@PathVariable Long orderBookId) {
+	/*
+	 * Used to get statistics of the order book
+	 * URI : /orderbooks/{orderBookId}/stastitics
+	 */
+	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_STATISTICS, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBookStatisticsDto getOrderBookStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookStats(orderBookId);
 	}
 
-	@GetMapping("/{bookId}/orders")
-	public List<Order> getOrdersByOrderBook(@PathVariable Long bookId) {
-		return orderService.getOrdersByOrderBook(bookId);
+	/*
+	 * Used to get statistics of the order in a order book
+	 * URI : /orderbooks/{orderBookId}/orderStatistics/{orderId}
+	 */
+	@RequestMapping(value = UrlConstants.URL_GET_ORDER_STATISTICS, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderStatisticsDto getOrderStats(@PathVariable Long orderBookId, @PathVariable Long orderId) {
+		return orderService.getOrderStats(orderId);
 	}
 
-	@GetMapping("/{bookId}/orders/{orderId}")
-	public Order getOrderByOrderBook(@PathVariable Long bookId, @PathVariable Long orderId) {
-		return orderService.getOrderByOrderBook(bookId, orderId);
-
+	/*
+	 * Used to Create a new order book
+	 * URI : /orderbooks/create
+	 */
+	@RequestMapping(value = UrlConstants.URL_CREATE_ORDER_BOOK, method = RequestMethod.POST)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBookDto createOrderBook(@RequestBody OrderBookDto orderBookDto) {
+		return orderBookService.createOrderBook(orderBookDto);
 	}
 
-	@PostMapping
-	public OrderBook newOrderBook(@RequestBody OrderBook orderBook) {
-		return orderBookService.saveBook(orderBook);
+	/*
+	 * Used to add an order in a orderbook
+	 * URI : /orderbooks/{orderBookId}/orders
+	 */
+	@RequestMapping(value = UrlConstants.URL_ADD_ORDER_BOOK, method = RequestMethod.PUT)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBookDto addOrderToOrderBook(@RequestBody OrderDto orderDto, @PathVariable Long orderBookId) {
+		return orderBookService.addOrderToOrderBook(orderBookId, orderDto);
 	}
 
-	@PostMapping("/{bookId}/orders")
-	public OrderBook newOrder(@RequestBody Order order, @PathVariable Long bookId) {
-		return orderBookService.addOrderInBook(order, bookId);
+	/*
+	 * Used to Close a orderbook
+	 * URI : /orderbooks/{orderBookId}/close
+	 */
+	@RequestMapping(value = UrlConstants.URL_CLOSE_ORDER_BOOK, method = RequestMethod.PUT)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBookDto closeOrderBook(@PathVariable Long orderBookId) {
+		return orderBookService.closeOrderBook(orderBookId);
 	}
-
-	@PutMapping("/{bookId}/orders/{orderId}")
-	public ApplicationContextException updateOrder(@RequestBody Order order, @PathVariable Long orderId) {
-		throw new ApplicationException(ErrorMessageEnum.UPDATE_ORDER_NOT_ALLOWED);
-
-	}
-
-	@PutMapping("/{id}")
-	public OrderBook updateOrderBook(@RequestBody OrderBook orderBook, @PathVariable Long id) {
-		return orderBookService.updateBook(orderBook, id);
-	}
-
-	@PutMapping("/{id}/orderBookStatus/{orderBookStatus}")
-	public OrderBook openCloseOrderBook(@PathVariable String orderBookStatus, @PathVariable Long id) {
-		return orderBookService.openCloseOrderBook(orderBookStatus, id);
-	}
-
-	@PutMapping("/{orderBookId}/executions")
-	public OrderBook addExecutionToBook(@PathVariable Long orderBookId, @RequestBody Execution execution) {
-		return orderBookService.addExecutionToBook(orderBookId, execution);
-	}
-
-	@DeleteMapping("/{id}")
-	public OrderBook deleteOrderBook(@PathVariable Long id) {
-		throw new ApplicationException(ErrorMessageEnum.DELETE_BOOK_NOT_SUPPORTED);
-	}
-
-	@DeleteMapping("/{bookId}/orders/{orderId}")
-	public void removeOrderFromBook(@PathVariable Long bookId, @PathVariable Long orderId) {
-		orderService.removeOrderFromBook(bookId, orderId);
-
+	/*
+	 * Used to execute Order book
+	 * URI : /orderbooks/{orderBookId}/execute
+	 */
+	@RequestMapping(value = UrlConstants.URL_EXECUTE_ORDER_BOOK, method = RequestMethod.PUT)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBookDto addExecutionToBook(@PathVariable Long orderBookId,
+			@RequestBody ExecutionDto executionDto) {
+		 OrderBookDto orderBookDto = orderBookService.addExecutionToBook(orderBookId, executionDto);
+		 if(orderBookDto.getOrderBookStatus()==OrderBookStatus.EXECUTED)
+		 {
+			 throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_EXECUTED);
+		 }
+		 else if(orderBookDto.getCreatedBy().equals(ApplicationConstants.PARTIAL_EXECUTION))
+		 {
+			 throw new ApplicationException(ErrorMessageEnum.PARTIALLY_EXECUTED);
+		 }
+		 else return orderBookDto;
+			 
 	}
 
 }

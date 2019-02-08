@@ -12,7 +12,9 @@ import com.cswm.assignment.model.Message;
 @ControllerAdvice
 class NotFoundAdvice {
 
-	
+	/*
+	 * No resource present or found
+	 */
 	@ResponseBody
 	@ExceptionHandler(NotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)

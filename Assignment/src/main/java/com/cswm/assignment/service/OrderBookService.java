@@ -4,34 +4,28 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.cswm.assignment.model.Execution;
-import com.cswm.assignment.model.Instrument;
-import com.cswm.assignment.model.Order;
-import com.cswm.assignment.model.OrderBook;
-import com.cswm.assignment.modelvos.OrderBookStatsVo;
+import com.cswm.assignment.model.dto.ExecutionDto;
+import com.cswm.assignment.model.dto.OrderBookDto;
+import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
+import com.cswm.assignment.model.dto.OrderDto;
 
 @Service
-public interface OrderBookService  {
+public interface OrderBookService {
 
-	List<OrderBook>  getOrderBooks();
+	List<OrderBookDto> getAllOrderBooks();
 
-	OrderBook getOrderBook(Long bookId);
+	OrderBookDto getOrderBook(Long orderBookId);
 
-	OrderBook saveBook(OrderBook orderBook);
+	OrderBookDto createOrderBook(OrderBookDto orderBookDto);
 
-	OrderBook updateBook(OrderBook orderBook,Long bookId);
+	OrderBookDto addOrderToOrderBook(Long orderBookId, OrderDto orderDto);
 
-	List<OrderBook> getOrderBooksByInstruments(Instrument instrument);
+	OrderBookDto closeOrderBook(Long orderBookId);
 
-	OrderBook openCloseOrderBook(String orderBookStatus, Long orderBookId);
+	OrderBookDto addExecutionToBook(Long orderBookId, ExecutionDto executionDto);
 
-	OrderBook addExecutionToBook(Long orderBookId, Execution execution);
+	OrderBookStatisticsDto getOrderBookStats(Long orderBookId);
 
-	OrderBookStatsVo getOrderBookStats(Long orderBookId);
-
-	OrderBook addOrderInBook(Order order, Long bookId);
-
-	OrderBook createDefaultOrderBook();
-
+	OrderBookDto createDefaultOrderBook();
 
 }

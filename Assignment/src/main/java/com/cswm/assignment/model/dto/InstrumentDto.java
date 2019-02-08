@@ -1,38 +1,18 @@
-package com.cswm.assignment.model;
+package com.cswm.assignment.model.dto;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+public class InstrumentDto {
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-@Entity
-@ApiModel
-@Table(name = "instrument_inv")
-public class Instrument {
-
-	@Id
-	@Column(name = "instrument_id")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "instruments_seq")
 	private Long instrumentId;
 
-	@Column(name = "instrument_name")
-	@ApiModelProperty("Name Should not be empty.")
 	private String instrumentName;
 
-	@Column(name = "created_by")
 	private String createdBy;
 
-	@Column(name = "created_on")
 	private LocalDateTime createdOn;
 
-	public Instrument() {
+	public InstrumentDto() {
 	}
 
 	public Long getInstrumentId() {
@@ -74,4 +54,5 @@ public class Instrument {
 	}
 
 
+	
 }

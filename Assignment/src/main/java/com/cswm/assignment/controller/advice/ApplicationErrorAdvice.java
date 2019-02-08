@@ -11,7 +11,10 @@ import com.cswm.assignment.model.Message;
 @ControllerAdvice
 public class ApplicationErrorAdvice {
 
-	
+	/*
+	 * Advice whenever there will be an application exception.
+	 * Errorcodes can be configured in the Error Enum
+	 */
 	@ResponseBody
 	@ExceptionHandler(ApplicationException.class)
 	@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)

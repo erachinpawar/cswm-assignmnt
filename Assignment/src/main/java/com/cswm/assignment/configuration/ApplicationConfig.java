@@ -4,20 +4,21 @@ import javax.annotation.PreDestroy;
 
 import org.springframework.context.annotation.Configuration;
 
+import com.cswm.assignment.ApplicationConstants;
+
 @Configuration
 public class ApplicationConfig {
 
 	@PreDestroy
 	public void onShutDown() {
-		System.out.println("Applicatio Shutdown initiated it will be closed in 30 secs ..");
+		System.out.println(ApplicationConstants.APPLICATION_SHUTDOWN_WARN);
+		try {
+			Thread.sleep(ApplicationConstants.GRACEFUL_SHUTDOWN_WINDOW);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
-//		try {
-//			Thread.sleep(30000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-
-		System.out.println("Application closed now ....");
+		System.out.println(ApplicationConstants.APPLICATION_SHUTDOWN_MSG);
 	}
 
 }
