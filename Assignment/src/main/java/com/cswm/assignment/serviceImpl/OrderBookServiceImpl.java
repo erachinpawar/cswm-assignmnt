@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -61,7 +62,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 
 	@Autowired
 	private ExecutionRepository executionRepository;
-	
+
 	@Autowired
 	private OrderDetailsRepository orderDetailsRepository;
 
@@ -73,7 +74,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 
 	@Override
 	public synchronized OrderBookDto createOrderBook(OrderBookDto orderBookDto) {
-		if (null == orderBookDto.getInstrument()||null == orderBookDto.getInstrument().getInstrumentId())
+		if (null == orderBookDto.getInstrument() || null == orderBookDto.getInstrument().getInstrumentId())
 			throw new ApplicationException(ErrorMessageEnum.BOOK_WITHOUT_INSTRUMENT);
 		Optional<Instrument> instrument = instrumentRepository.findById(orderBookDto.getInstrument().getInstrumentId());
 		if (instrument.isPresent() && orderBookRepository.findFirstByInstrumentAndOrderBookStatusNot(instrument.get(),
@@ -100,7 +101,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_NOT_OPEN);
 		if (!orderBookDto.getInstrument().getInstrumentId().equals(orderDto.getInstrument().getInstrumentId()))
 			throw new ApplicationException(ErrorMessageEnum.ORDER_NOT_BELONG_TO_INSTRUMENT);
-		if(null==orderDto.getOrderDetails())
+		if (null == orderDto.getOrderDetails())
 			orderDto.setOrderDetails(new OrderDetailsDto());
 		if (null == orderDto.getOrderprice() || orderDto.getOrderprice() == BigDecimal.ZERO)
 			orderDto.getOrderDetails().setOrderType(OrderType.MARKET_ORDER);
@@ -134,20 +135,29 @@ public class OrderBookServiceImpl implements OrderBookService {
 		if (null == executionDto.getPrice() || executionDto.getPrice() == BigDecimal.ZERO)
 			throw new ApplicationException(ErrorMessageEnum.EXECUTION_PRICE_ZERO);
 		OrderBookDto orderBookDto = getOrderBook(orderBookId);
-		/* TODO : need to ask which code to keep. Whether one condition fine as prev. or need reason for rejection more specific.
-		 if (!OrderBookStatus.CLOSED.equals(orderBookDto.getOrderBookStatus()))
-			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_NOT_CLOSED);
+		/*
+		 * TODO : need to ask which code to keep. Whether one condition fine as prev. or
+		 * need reason for rejection more specific. if
+		 * (!OrderBookStatus.CLOSED.equals(orderBookDto.getOrderBookStatus())) throw new
+		 * ApplicationException(ErrorMessageEnum.ORDER_BOOK_NOT_CLOSED);
 		 */
-		
+
 		if (OrderBookStatus.OPEN.equals(orderBookDto.getOrderBookStatus()))
 			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_STATUS_OPEN);
 		if (OrderBookStatus.EXECUTED.equals(orderBookDto.getOrderBookStatus()))
 			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_STATUS_EXECUTED);
 		if (!CollectionUtils.isEmpty(orderBookDto.getExecutions())
-				&& !(executionDto.getPrice().compareTo(orderBookDto.getExecutions().iterator().next().getPrice())==0))
+				&& !(executionDto.getPrice().compareTo(orderBookDto.getExecutions().iterator().next().getPrice()) == 0))
 			throw new ApplicationException(ErrorMessageEnum.EXECUTION_PRICE_INVALID);
 		executionDto.setOrderBook(orderBookDto);
-		Set<OrderDto> validOrderdDtos =getValidOrders(orderBookDto.getOrders(), executionDto.getPrice());
+		Set<OrderDto> validOrderdDtos = new HashSet<OrderDto>();
+		if (CollectionUtils.isEmpty(orderBookDto.getExecutions()))
+			validOrderdDtos = getValidOrders(orderBookDto.getOrders(), executionDto.getPrice());
+		else
+			validOrderdDtos = orderBookDto.getOrders().stream()
+					.filter(orderDto -> orderDto.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID))
+					.collect(Collectors.toSet());
+
 		Long totalDemand = 0l;
 		Long totalExecutions = 0l;
 		for (OrderDto orderDto : validOrderdDtos) {
@@ -157,7 +167,8 @@ public class OrderBookServiceImpl implements OrderBookService {
 		}
 		if (totalDemand <= totalExecutions.doubleValue()) {
 			orderBookDto.setOrderBookStatus(OrderBookStatus.EXECUTED);
-			orderBookRepository.updateOrderBookStatus(orderBookId, OrderBookStatus.EXECUTED);;
+			orderBookRepository.updateOrderBookStatus(orderBookId, OrderBookStatus.EXECUTED);
+
 			return orderBookDto;
 		}
 		Long effectiveQtyForCurrentExec = ((totalExecutions + executionDto.getQuantity()) > totalDemand)
@@ -178,16 +189,17 @@ public class OrderBookServiceImpl implements OrderBookService {
 	}
 
 	@Override
-	public OrderBookStatisticsDto getOrderBookStats(Long orderBookId) {
+	public synchronized OrderBookStatisticsDto getOrderBookStats(Long orderBookId) {
 		OrderBookDto orderBookDto = getOrderBook(orderBookId);
 		Set<OrderDto> bookOrders = orderBookDto.getOrders();
 		Map<OrderTypesInStatistics, OrderDto> OrderTypeClassification = new HashMap<>();
 		BigDecimal executionPrice = (CollectionUtils.isEmpty(orderBookDto.getExecutions()) ? BigDecimal.ZERO
 				: orderBookDto.getExecutions().iterator().next().getPrice());
-		Set<OrderDto> validOrderDtos = getValidOrders(bookOrders, executionPrice);
+		Set<OrderDto> validOrderDtos = bookOrders.stream()
+				.filter(orderDto -> orderDto.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID))
+				.collect(Collectors.toSet());
 
 		OrderBookStatisticsDto orderBookStatsVo = new OrderBookStatisticsDto();
-		orderBookStatsVo.setOrderBookDto(orderBookDto);
 		orderBookStatsVo.setTotalNoOfOrders((long) bookOrders.size());
 		orderBookStatsVo.setValidOrderCount((long) validOrderDtos.size());
 		orderBookStatsVo.setInValidOrderCount((long) (bookOrders.size() - validOrderDtos.size()));
@@ -216,7 +228,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 				LargestOrderQuantity = orderDto.getOrderQuantity();
 				OrderTypeClassification.put(OrderTypesInStatistics.BIGGEST_ORDER, orderDto);
 			}
-			if (earliest.compareTo(orderBookDto.getCreatedOn()) > 1) {
+			if (earliest.compareTo(orderDto.getCreatedOn()) > 1) {
 				earliest = orderDto.getCreatedOn();
 				OrderTypeClassification.put(OrderTypesInStatistics.EARLIEST_ORDER, orderDto);
 			}
@@ -242,8 +254,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 					.compareTo(null == orderDto.getOrderprice() ? BigDecimal.ZERO : orderDto.getOrderprice()) == -1
 					&& orderDto.getOrderDetails().getOrderType() == OrderType.LIMIT_ORDER))
 				validOrderDtos.add(orderDto);
-			else
-			{
+			else {
 				orderDto.getOrderDetails().setOrderStatus(OrderStatus.INVALID);
 				orderDetailsRepository.save(new ModelMapper().map(orderDto.getOrderDetails(), OrderDetails.class));
 			}

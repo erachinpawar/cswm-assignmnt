@@ -25,7 +25,6 @@ public class OrderBookStatisticsDto {
 	private Long invalidDemand;
 	private Long executionQty;
 	private BigDecimal executionPrice;
-	private OrderBookDto orderBookDto;
 
 	public Long getTotalNoOfOrders() {
 		return totalNoOfOrders;
@@ -99,21 +98,13 @@ public class OrderBookStatisticsDto {
 		this.executionPrice = executionPrice;
 	}
 
-	public OrderBookDto getOrderBookDto() {
-		return orderBookDto;
-	}
-
-	public void setOrderBookDto(OrderBookDto orderBookDto) {
-		this.orderBookDto = orderBookDto;
-	}
-
 	@Override
 	public String toString() {
-		return "OrderBookStatsVo [totalNoOfOrders=" + totalNoOfOrders + ", totalNoofAccuOrders=" + totalNoofAccuOrders
-				+ ", orderStats=" + orderTypesInStats + ", validOrderCount=" + validOrderCount + ", inValidOrderCount="
-				+ inValidOrderCount + ", validDemand=" + validDemand + ", invalidDemand=" + invalidDemand
-				+ ", executionQty=" + executionQty + ", executionPrice=" + executionPrice + ", orderBookDto="
-				+ orderBookDto + "]";
+		return "OrderBookStatisticsDto [totalNoOfOrders=" + totalNoOfOrders + ", totalNoofAccuOrders="
+				+ totalNoofAccuOrders + ", orderTypesInStats=" + orderTypesInStats + ", validOrderCount="
+				+ validOrderCount + ", inValidOrderCount=" + inValidOrderCount + ", validDemand=" + validDemand
+				+ ", invalidDemand=" + invalidDemand + ", executionQty=" + executionQty + ", executionPrice="
+				+ executionPrice + "]";
 	}
 
 }

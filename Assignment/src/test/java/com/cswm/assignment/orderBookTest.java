@@ -425,7 +425,7 @@ public class orderBookTest extends AbstractTest {
 		assertEquals(180l, orderBookStatisticsDto.getValidDemand().longValue());
 		assertEquals(180l, orderBookStatisticsDto.getExecutionQty().longValue());
 		assertEquals(0, BigDecimal.valueOf(1600l).compareTo(orderBookStatisticsDto.getExecutionPrice()));
-		assertEquals(5l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.EARLIEST_ORDER).getOrderId().longValue());
+		assertEquals(4l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.EARLIEST_ORDER).getOrderId().longValue());
 		assertEquals(7l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
 		assertEquals(6l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
 		assertEquals(4l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
