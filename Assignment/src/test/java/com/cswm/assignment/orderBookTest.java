@@ -14,66 +14,423 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.cswm.assignment.applicationutils.ErrorMessageEnum;
+import com.cswm.assignment.applicationutils.OrderBookStatus;
+import com.cswm.assignment.applicationutils.OrderStatus;
+import com.cswm.assignment.applicationutils.OrderType;
+import com.cswm.assignment.applicationutils.OrderTypesInStatistics;
 import com.cswm.assignment.model.Message;
+import com.cswm.assignment.model.dto.ExecutionDto;
 import com.cswm.assignment.model.dto.InstrumentDto;
 import com.cswm.assignment.model.dto.OrderBookDto;
 import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
 import com.cswm.assignment.model.dto.OrderDto;
 
-
 @FixMethodOrder(MethodSorters.JVM)
 public class orderBookTest extends AbstractTest {
 
-
-	@Test
-	public void getOrderBooksTest() throws Exception {
-		String uri = "/orderbooks";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-				.andReturn();
-		int status = mvcResult.getResponse().getStatus();
-		assertEquals(200, status);
-		String content = mvcResult.getResponse().getContentAsString();
-		OrderBookDto[] orderBookDtos = mapFromJson(content, OrderBookDto[].class);
-		assertEquals(0,orderBookDtos.length);
-	}
-
-	@Test
-	public void getOrderBookTest() throws Exception {
-		String uri = "/orderbooks/1001";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-				.andReturn();
-		int status = mvcResult.getResponse().getStatus();
-		String content = mvcResult.getResponse().getContentAsString();
-		Message message = mapFromJson(content, Message.class);
-		assertEquals(404, status);
-		System.out.println(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage());
-		System.out.println(message.getMessage());
-		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage(), message.getMessage());
-	}
-	
-	
+	/// Create order Book Test Cases /////
 	@Test
 	public void newOrderBookTest() throws Exception {
 		String uri = "/orderbooks/create";
 		OrderBookDto orderBookDto = new OrderBookDto();
-		orderBookDto.setOrderBookId(2001l);
-		orderBookDto.setExecutions(null);
 		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentName("New Instrument2");
+		instrumentDto.setInstrumentId(1l);
 		orderBookDto.setInstrument(instrumentDto);
 		String inputJson = super.mapToJson(orderBookDto);
-		MvcResult mvcResult = mvc.perform(
-				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
 				.andReturn();
-		
+
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookDto createdOrderBook = mapFromJson(content, OrderBookDto.class);
 		assertEquals(200, status);
 		assertNotEquals(null, createdOrderBook.getOrderBookId());
 		assertNotEquals(null, createdOrderBook.getInstrument().getInstrumentId());
-		assertEquals("New Instrument2", createdOrderBook.getInstrument().getInstrumentName());
 	}
+
+	@Test
+	public void newOrderBookNoInstrumentTest() throws Exception {
+		String uri = "/orderbooks/create";
+		OrderBookDto orderBookDto = new OrderBookDto();
+		orderBookDto.setOrderBookId(2001l);
+		String inputJson = super.mapToJson(orderBookDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.BOOK_WITHOUT_INSTRUMENT.getMessage(), message.getMessage());
+	}
+
+	@Test
+	public void newOrderBooWithOtherOpenBook() throws Exception {
+		String uri = "/orderbooks/create";
+		OrderBookDto orderBookDto = new OrderBookDto();
+		InstrumentDto instrumentDto = new InstrumentDto();
+		instrumentDto.setInstrumentId(1l);
+		orderBookDto.setInstrument(instrumentDto);
+		String inputJson = super.mapToJson(orderBookDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		mvcResult = mvc
+				.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.NOT_EXECUTED_ORDER_BOOK_PRESENT.getMessage(), message.getMessage());
+	}
+
+	//// Add order order to order book
+	@Test
+	public void addLimitOrderToOrderBook() throws Exception {
+		/// add order to order book
+		String uri = "/orderbooks/1001/orders";
+		OrderDto orderDto = new OrderDto();
+		InstrumentDto instrumentDto = new InstrumentDto();
+		instrumentDto.setInstrumentId(2l);
+		orderDto.setInstrument(instrumentDto);
+		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
+		orderDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(orderDto);
+		inputJson = super.mapToJson(orderDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderDto addedOrderDto = mapFromJson(content, OrderDto.class);
+		assertEquals(200, status);
+		assertNotEquals(null, addedOrderDto.getInstrument());
+		assertEquals(2l, addedOrderDto.getInstrument().getInstrumentId().longValue());
+		assertEquals(OrderType.LIMIT_ORDER, addedOrderDto.getOrderDetails().getOrderType());
+		assertEquals(OrderStatus.VALID, addedOrderDto.getOrderDetails().getOrderStatus());
+	}
+
+	@Test
+	public void addMarketOrderToOrderBook() throws Exception {
+		/// add order to order book
+		String uri = "/orderbooks/1001/orders";
+		OrderDto orderDto = new OrderDto();
+		InstrumentDto instrumentDto = new InstrumentDto();
+		instrumentDto.setInstrumentId(2l);
+		orderDto.setInstrument(instrumentDto);
+		orderDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(orderDto);
+		inputJson = super.mapToJson(orderDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderDto addedOrderDto = mapFromJson(content, OrderDto.class);
+		assertEquals(200, status);
+		assertNotEquals(null, addedOrderDto.getInstrument());
+		assertEquals(2l, addedOrderDto.getInstrument().getInstrumentId().longValue());
+		assertEquals(OrderType.MARKET_ORDER, addedOrderDto.getOrderDetails().getOrderType());
+		assertEquals(OrderStatus.VALID, addedOrderDto.getOrderDetails().getOrderStatus());
+	}
+
+	@Test
+	public void addOrderToOrderBookWithDifferntInstrument() throws Exception {
+		/// add order to order book
+		String uri = "/orderbooks/1001/orders";
+		OrderDto orderDto = new OrderDto();
+		InstrumentDto instrumentDto = new InstrumentDto();
+		instrumentDto.setInstrumentId(3l);
+		orderDto.setInstrument(instrumentDto);
+		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
+		orderDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(orderDto);
+		inputJson = super.mapToJson(orderDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.ORDER_NOT_BELONG_TO_INSTRUMENT.getMessage(), message.getMessage());
+	}
+
+	@Test
+	public void addOrderToOrderBookWithBookNotOpen() throws Exception {
+		/// add order to order book
+		String uri = "/orderbooks/1001/orders";
+		String closeUri = "/orderbooks/1001/close";
+		OrderDto orderDto = new OrderDto();
+		InstrumentDto instrumentDto = new InstrumentDto();
+		instrumentDto.setInstrumentId(3l);
+		orderDto.setInstrument(instrumentDto);
+		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
+		orderDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(orderDto);
+		inputJson = super.mapToJson(orderDto);
+		MvcResult mvcResult = mvc
+				.perform(
+						MockMvcRequestBuilders.put(closeUri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_OPEN.getMessage(), message.getMessage());
+	}
+
+	@Test
+	public void addOrderToOrderBookWithNoInstrument() throws Exception {
+		/// add order to order book
+		String uri = "/orderbooks/1001/orders";
+		OrderDto orderDto = new OrderDto();
+		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
+		orderDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(orderDto);
+		inputJson = super.mapToJson(orderDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.INSRTUMENT_NOT_PRESENT.getMessage(), message.getMessage());
+	}
+
+	@Test
+	public void addOrderToOrderBookWithNoQty() throws Exception {
+		/// add order to order book
+		String uri = "/orderbooks/1001/orders";
+		OrderDto orderDto = new OrderDto();
+		InstrumentDto instrumentDto = new InstrumentDto();
+		instrumentDto.setInstrumentId(3l);
+		orderDto.setInstrument(instrumentDto);
+		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
+		String inputJson = super.mapToJson(orderDto);
+		inputJson = super.mapToJson(orderDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.ORDER_QUANTITY_INVALID.getMessage(), message.getMessage());
+	}
+
+	// close order book
+	@Test
+	public void closeOrderBook() throws Exception {
+		/// add order to order book
+		String uri = "/orderbooks/1002/close";
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderBookDto orderBookDto = mapFromJson(content, OrderBookDto.class);
+		assertEquals(200, status);
+		assertEquals(OrderBookStatus.CLOSED, orderBookDto.getOrderBookStatus());
+	}
+
+	@Test
+	public void closeOrderBookStatusNotInOpen() throws Exception {
+		/// add order to order book
+		String uri = "/orderbooks/1002/close";
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.BOOK_STATUS_NOT_OPEN.getMessage(), message.getMessage());
+	}
+
+	// Add Executions to order Book
+	@Test
+	public void addExecutionToOrderBook() throws Exception {
+		String uri = "/orderbooks/1003/execution";
+		ExecutionDto executionDto = new ExecutionDto();
+		executionDto.setPrice(BigDecimal.valueOf(40l));
+		executionDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderBookDto orderBookDto = mapFromJson(content, OrderBookDto.class);
+		orderBookDto.getOrders().forEach(order -> {
+			if (order.getOrderId().longValue() == 6l) {
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(27l, order.getOrderDetails().getExecutionQuantity().longValue());
+			}
+			if (order.getOrderId().longValue() == 5l) {
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(14l, order.getOrderDetails().getExecutionQuantity().longValue());
+			}
+			if (order.getOrderId().longValue() == 7l) {
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(9l, order.getOrderDetails().getExecutionQuantity().longValue());
+			}
+			if (order.getOrderId().longValue() == 4l) {
+				assertEquals(OrderStatus.INVALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(0l, order.getOrderDetails().getExecutionQuantity().longValue());
+			}
+		});
+		assertEquals(200, status);
+	}
+
+	@Test
+	public void addExecutionToOrderBookInvalidQty() throws Exception {
+		String uri = "/orderbooks/1003/execution";
+		ExecutionDto executionDto = new ExecutionDto();
+		executionDto.setPrice(BigDecimal.valueOf(40l));
+		executionDto.setQuantity(0l);
+		String inputJson = super.mapToJson(executionDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.EXECUTION_QTY_INVALID.getMessage(), message.getMessage());
+	}
+
+	@Test
+	public void addExecutionToOrderBookWithDiffExecutionPrice() throws Exception {
+		String uri = "/orderbooks/1003/execution";
+		ExecutionDto executionDto = new ExecutionDto();
+		executionDto.setPrice(BigDecimal.valueOf(50l));
+		executionDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.EXECUTION_PRICE_INVALID.getMessage(), message.getMessage());
+	}
+
+	@Test
+	public void addExecutionToOrderBookHasOpenStatus() throws Exception {
+		String uri = "/orderbooks/1007/execution";
+		ExecutionDto executionDto = new ExecutionDto();
+		executionDto.setPrice(BigDecimal.valueOf(40l));
+		executionDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.ORDER_BOOK_STATUS_OPEN.getMessage(), message.getMessage());
+	}
+
+	@Test
+	public void addExecutionToOrderBookZeroPrice() throws Exception {
+		String uri = "/orderbooks/1003/execution";
+		ExecutionDto executionDto = new ExecutionDto();
+		executionDto.setPrice(BigDecimal.valueOf(0l));
+		executionDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.EXECUTION_PRICE_ZERO.getMessage(), message.getMessage());
+	}
+
+	@Test
+	public void addExecutionToOrderPartialExecution() throws Exception {
+		String uri = "/orderbooks/1003/execution";
+		ExecutionDto executionDto = new ExecutionDto();
+		executionDto.setPrice(BigDecimal.valueOf(40l));
+		executionDto.setQuantity(200l);
+		String inputJson = super.mapToJson(executionDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderBookDto orderBookDto = mapFromJson(content, OrderBookDto.class);
+		orderBookDto.getOrders().forEach(order -> {
+			if (order.getOrderId().longValue() == 4l) {
+				assertEquals(OrderStatus.INVALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(0l, order.getOrderDetails().getExecutionQuantity().longValue());
+			}
+			if (order.getOrderId().longValue() == 5l) {
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(50l, order.getOrderDetails().getExecutionQuantity().longValue());
+			}
+			if (order.getOrderId().longValue() == 6l) {
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(100l, order.getOrderDetails().getExecutionQuantity().longValue());
+			}
+			if (order.getOrderId().longValue() == 7l) {
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(30l, order.getOrderDetails().getExecutionQuantity().longValue());
+			}
+
+		});
+		assertEquals(200, status);
+	}
+
+	@Test
+	public void addExecutionToOrderBookWithExeccutedStatus() throws Exception {
+		String uri = "/orderbooks/1008/execution";
+		ExecutionDto executionDto = new ExecutionDto();
+		executionDto.setPrice(BigDecimal.valueOf(40l));
+		executionDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionDto);
+		MvcResult mvcResult = mvc
+				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		Message message = mapFromJson(content, Message.class);
+		assertEquals(406, status);
+		assertEquals(ErrorMessageEnum.ORDER_BOOK_STATUS_EXECUTED.getMessage(), message.getMessage());
+	}
+
+	//// get Order Book Stats
+	@Test
+	public void getOrderBookStatistics() throws Exception {
+		String uri = "/orderbooks/1003/stastitics";
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderBookStatisticsDto orderBookStatisticsDto = mapFromJson(content, OrderBookStatisticsDto.class);
+		assertEquals(200, status);
+		assertEquals(4l, orderBookStatisticsDto.getTotalNoOfOrders().longValue());
+		assertEquals(200l, orderBookStatisticsDto.getTotalNoofAccuOrders().longValue());
+		assertEquals(3l, orderBookStatisticsDto.getValidOrderCount().longValue());
+		assertEquals(1l, orderBookStatisticsDto.getInValidOrderCount().longValue());
+		assertEquals(20l, orderBookStatisticsDto.getInvalidDemand().longValue());
+		assertEquals(180l, orderBookStatisticsDto.getValidDemand().longValue());
+		assertEquals(180l, orderBookStatisticsDto.getExecutionQty().longValue());
+		assertEquals(0, BigDecimal.valueOf(1600l).compareTo(orderBookStatisticsDto.getExecutionPrice()));
+		assertEquals(5l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.EARLIEST_ORDER).getOrderId().longValue());
+		assertEquals(7l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
+		assertEquals(6l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
+		assertEquals(4l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
+		
+	}	
 	
 	@Test
 	public void getOrderBookStatsNtFoundTest() throws Exception {
@@ -84,595 +441,7 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
 		assertEquals(404, status);
-		System.out.println(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage());
-		System.out.println(message.getMessage());
 		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage(), message.getMessage());
 	}
-	
-	@Test
-	public void newOrderBookNoInstrumentTest() throws Exception {
-		String uri = "/orderbooks/create";
-		OrderBookDto orderBookDto = new OrderBookDto();
-		orderBookDto.setOrderBookId(2001l);
-		orderBookDto.setExecutions(null);
-		String inputJson = super.mapToJson(orderBookDto);
-		MvcResult mvcResult = mvc.perform(
-				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
-		int status = mvcResult.getResponse().getStatus();
-		String content = mvcResult.getResponse().getContentAsString();
-		Message message = mapFromJson(content, Message.class);
-		assertEquals(406, status);
-		assertEquals(ErrorMessageEnum.BOOK_WITHOUT_INSTRUMENT.getMessage(), message.getMessage());
-	}
-	
-	@Test
-	public void newOrderBooWithOtherOpenBook() throws Exception {
-		String uri = "/orderbooks/create";
-		OrderBookDto orderBookDto = new OrderBookDto();
-		orderBookDto.setExecutions(null);
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentName("New Instrument");
-		orderBookDto.setInstrument(instrumentDto);
-		String inputJson = super.mapToJson(orderBookDto);
-		MvcResult mvcResult = mvc.perform(
-				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
-		mvcResult = mvc.perform(
-				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
-		int status = mvcResult.getResponse().getStatus();
-		String content = mvcResult.getResponse().getContentAsString();
-		Message message = mapFromJson(content, Message.class);
-		assertEquals(406, status);
-		assertEquals(ErrorMessageEnum.NOT_EXECUTED_ORDER_BOOK_PRESENT.getMessage(), message.getMessage());
-	}
-	
-
-	@Test///orderbooks/{orderBookId}/orders
-	public void addOrderToOrderBook() throws Exception {
-		String uri = "/orderbooks/create";
-		OrderBookDto orderBookDto = new OrderBookDto();
-		orderBookDto.setOrderBookId(1001l);
-		orderBookDto.setExecutions(null);
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentName("New Instrument1");
-		orderBookDto.setInstrument(instrumentDto);
-		String inputJson = super.mapToJson(orderBookDto);
-		MvcResult mvcResult = mvc.perform(
-				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
-		uri="/orderbooks/1001/orders";
-		OrderDto orderDto=new OrderDto();
-		orderDto.setInstrument(instrumentDto);
-		orderDto.setOrderBook(orderBookDto);
-		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
-		orderDto.setOrderQuantity(100l);
-		inputJson = super.mapToJson(orderDto);
-		mvcResult = mvc.perform(
-				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
-		int status = mvcResult.getResponse().getStatus();
-		String content = mvcResult.getResponse().getContentAsString();
-		Message message = mapFromJson(content, Message.class);
-		assertEquals(404, status);
-		System.out.println(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage());
-		System.out.println(message.getMessage());
-		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage(), message.getMessage());
-	}
-	
-//
-//	@Test
-//	public void getOrderBookNotFound() throws Exception {
-//		String uri = "/orderbooks/2004";
-//		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(404, status);
-//		System.out.println(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage());
-//		System.out.println(message.getMessage());
-//		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage(), message.getMessage());
-//	}
-//
-//
-//
-//
-//	@Test
-//	public void getOrderBookStatsTest() throws Exception {
-//		String uri = "/orderbooks/1001/orderBookstats";
-//		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		OrderBookStatsVo orderBookStats = mapFromJson(content, OrderBookStatsVo.class);
-//		assertEquals(200, status);
-//		assertEquals(1l, orderBookStats.getTotalNoOfOrders().longValue());
-//		assertEquals(1l,orderBookStats.getValidOrderCount().longValue());
-//		assertEquals(200l ,orderBookStats.getTotalNoofAccuOrders().longValue());
-//		assertEquals(200l, orderBookStats.getValidDemand().longValue());
-//		assertEquals(0 ,orderBookStats.getInValidOrderCount().longValue());
-//		assertEquals(0 ,orderBookStats.getExecutionQty().longValue());
-//		assertEquals("Order-1", orderBookStats.getOrderStats().get(OrderTypesInStats.BIGGEST_ORDER).getOrderName());
-//		assertEquals("Order-1", orderBookStats.getOrderStats().get(OrderTypesInStats.LATEST_ORDER).getOrderName());
-//		assertEquals("Order-1", orderBookStats.getOrderStats().get(OrderTypesInStats.EARLIEST_ORDER).getOrderName());
-//		assertEquals("Order-1", orderBookStats.getOrderStats().get(OrderTypesInStats.SMALLEST_ORDER).getOrderName());
-//	}
-//
-//	@Test
-//	public void getOrderBookStatsNtFoundTest() throws Exception {
-//		String uri = "/orderbooks/2004/orderBookstats";
-//		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(404, status);
-//		System.out.println(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage());
-//		System.out.println(message.getMessage());
-//		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderBookTest() throws Exception {
-//		String uri = "/orderbooks";
-//		OrderBook orderBook = new OrderBook();
-//		orderBook.setOrderBookId(2001l);
-//		orderBook.setOrderBookName("Demo OrderBok");
-//		orderBook.setExecutions(null);
-//		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
-//		
-//		Instrument instrument = new Instrument();
-//		instrument.setInstrumentId(1001l);
-//		instrument.setCreatedBy("Jnit Test");
-//		instrument.setCreatedOn(LocalDateTime.now());
-//		instrument.setInstrumentName("New Instrument");
-//		orderBook.setInstrument(instrument);
-//		orderBook.setOrderBookStatus(OrderBookStatus.OPEN);
-//		String inputJson = super.mapToJson(orderBook);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		OrderBook createdOrderBook = mapFromJson(content, OrderBook.class);
-//		assertEquals(200, status);
-//		assertNotEquals(null, createdOrderBook.getOrderBookId());
-//		assertNotEquals(null, createdOrderBook.getInstrument().getInstrumentId());
-//	}
-//
-//	@Test
-//	public void closeBook() throws Exception {
-//		String uri = "/orderbooks/1001/orderBookStatus/CLOSE";
-//		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		OrderBook createdOrderBook = mapFromJson(content, OrderBook.class);
-//		assertEquals(200, status);
-//		assertEquals(OrderBookStatus.CLOSE, createdOrderBook.getOrderBookStatus());
-//	}
-//
-//	@Test
-//	public void openBook() throws Exception {
-//		String uri = "/orderbooks/1001/orderBookStatus/OPEN";
-//		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		OrderBook createdOrderBook = mapFromJson(content, OrderBook.class);
-//		assertEquals(200, status);
-//		assertEquals(OrderBookStatus.OPEN, createdOrderBook.getOrderBookStatus());
-//	}
-//
-//	@Test
-//	public void newOrderBookClosedTest() throws Exception {
-//		String uri = "/orderbooks";
-//		OrderBook orderBook = new OrderBook();
-//		orderBook.setOrderBookId(2001l);
-//		orderBook.setOrderBookName("Demo OrderBok");
-//		orderBook.setExecutions(null);
-//		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
-//		Instrument instrument = new Instrument();
-//		instrument.setCreatedBy("Jnit Test");
-//		instrument.setCreatedOn(LocalDateTime.now());
-//		instrument.setInstrumentName("New Instrument");
-//		orderBook.setInstrument(instrument);
-//		orderBook.setOrderBookStatus(OrderBookStatus.CLOSE);
-//		String inputJson = super.mapToJson(orderBook);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.ORDER_BOOK_CAN_NOT_BECLOSED.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderBookNoInstrumentTest() throws Exception {
-//		String uri = "/orderbooks";
-//		OrderBook orderBook = new OrderBook();
-//		orderBook.setOrderBookId(2001l);
-//		orderBook.setOrderBookName("Demo OrderBok");
-//		orderBook.setExecutions(null);
-//		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
-//		orderBook.setOrderBookStatus(OrderBookStatus.OPEN);
-//		String inputJson = super.mapToJson(orderBook);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.BOOK_WITHOUT_INSTRUMENT.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderBookExecutionTest() throws Exception {
-//		String uri = "/orderbooks";
-//		OrderBook orderBook = new OrderBook();
-//		orderBook.setOrderBookId(2001l);
-//		orderBook.setOrderBookName("Demo OrderBok");
-//		Execution execution = new Execution();
-//		execution.setCreatedBy("Unit test");
-//		execution.setCreatedOn(LocalDateTime.now());
-//		execution.setExecutionName("Unit test Execution");
-//		execution.setPrice(2000d);
-//		execution.setQuantity(200l);
-//		Set<Execution> executions = new HashSet<Execution>();
-//		executions.add(execution);
-//		orderBook.setExecutions(executions);
-//		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
-//		Instrument instrument = new Instrument();
-//		instrument.setCreatedBy("Jnit Test");
-//		instrument.setCreatedOn(LocalDateTime.now());
-//		instrument.setInstrumentName("New Instrument");
-//		orderBook.setInstrument(instrument);
-//		orderBook.setOrderBookStatus(OrderBookStatus.OPEN);
-//		String inputJson = super.mapToJson(orderBook);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.CAN_NOT_ADD_EXECUTION_IN_CREATION.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderBookExecutedTest() throws Exception {
-//		String uri = "/orderbooks";
-//		OrderBook orderBook = new OrderBook();
-//		orderBook.setOrderBookId(2001l);
-//		orderBook.setOrderBookName("Demo OrderBok");
-//		orderBook.setExecutions(null);
-//		orderBook.setCreatedBy("Unit test");
-//		orderBook.setCreatedOn(LocalDateTime.now());
-//		orderBook.setExecutionStatus(ExecutionStatus.EXECUTED);
-//		Instrument instrument = new Instrument();
-//		instrument.setCreatedBy("Jnit Test");
-//		instrument.setCreatedOn(LocalDateTime.now());
-//		instrument.setInstrumentName("New Instrument");
-//		orderBook.setInstrument(instrument);
-//		orderBook.setOrderBookStatus(OrderBookStatus.OPEN);
-//		String inputJson = super.mapToJson(orderBook);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.BOOK_EXECUTED_IN_CREATION.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderBookNtNameTest() throws Exception {
-//		String uri = "/orderbooks";
-//		OrderBook orderBook = new OrderBook();
-//		orderBook.setOrderBookId(2001l);
-//		orderBook.setCreatedBy("Unit test");
-//		orderBook.setCreatedOn(LocalDateTime.now());
-//		orderBook.setExecutions(null);
-//		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
-//		Instrument instrument = new Instrument();
-//		instrument.setCreatedBy("Jnit Test");
-//		instrument.setCreatedOn(LocalDateTime.now());
-//		instrument.setInstrumentName("New Instrument");
-//		instrument.setCreatedOn(LocalDateTime.now());
-//		instrument.setInstrumentName("New Instrument");
-//		orderBook.setInstrument(instrument);
-//		orderBook.setOrderBookStatus(OrderBookStatus.OPEN);
-//		String inputJson = super.mapToJson(orderBook);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.BOOK_NAME_BLANK.getMessage(), message.getMessage());
-//	}
-//
-//
-//	@Test
-//	public void newOrderTest() throws Exception {
-//		Instrument instrument = instrumentService.getInstrumentById(1001l);
-//		openBook();
-//		String uri = "/orderbooks/1001/orders";
-//		OrderBuilder orderBuilder = new OrderBuilder();
-//		orderBuilder.setOrderName("Unit Test Order");
-//		orderBuilder.setInstrument(instrument);
-//		orderBuilder.setOrderQuantity(200l);
-//		orderBuilder.setOrderprice(400d);
-//		orderBuilder.setOrderStatus(OrderStatus.VALID);
-//		orderBuilder.setOrderType(OrderType.LIMIT_ORDER);
-//		orderBuilder.setOrderBook(null);
-//		orderBuilder.setExecutionQuantity(2l);
-//		orderBuilder.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-//		orderBuilder.setCreatedOn(LocalDateTime.now());
-//		Order order = new Order(orderBuilder);
-//		String inputJson = mapToJson(order );
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		OrderBook orderBook = mapFromJson(content, OrderBook.class);
-//		assertEquals(200, status);
-//		assertEquals(2, orderBook.getOrders().size());
-//	}
-//
-//	@Test
-//	public void newOrderClosedBookTest() throws Exception {
-//		Instrument instrument = instrumentService.getInstrumentById(1001l);
-//		closeBook();
-//		String uri = "/orderbooks/1001/orders";
-//		OrderBuilder orderBuilder = new OrderBuilder();
-//		orderBuilder.setOrderName("Unit Test Order");
-//		orderBuilder.setInstrument(instrument);
-//		orderBuilder.setOrderQuantity(200l);
-//		orderBuilder.setOrderprice(400d);
-//		orderBuilder.setOrderStatus(OrderStatus.VALID);
-//		orderBuilder.setOrderType(OrderType.LIMIT_ORDER);
-//		orderBuilder.setOrderBook(null);
-//		orderBuilder.setExecutionQuantity(2l);
-//		orderBuilder.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-//		orderBuilder.setCreatedOn(LocalDateTime.now());
-//		Order order = new Order(orderBuilder);
-//		String inputJson = mapToJson(order);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.ADD_ORDER_ORDERBOOK_CLOSED.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderNoNameTest() throws Exception {
-//		Instrument instrument = instrumentService.getInstrumentById(1001l);
-//		openBook();
-//		String uri = "/orderbooks/1001/orders";OrderBuilder orderBuilder = new OrderBuilder();
-//		orderBuilder.setInstrument(instrument);
-//		orderBuilder.setOrderQuantity(200l);
-//		orderBuilder.setOrderprice(400d);
-//		orderBuilder.setOrderStatus(OrderStatus.VALID);
-//		orderBuilder.setOrderType(OrderType.LIMIT_ORDER);
-//		orderBuilder.setOrderBook(null);
-//		orderBuilder.setExecutionQuantity(2l);
-//		orderBuilder.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-//		orderBuilder.setCreatedOn(LocalDateTime.now());
-//		Order order = new Order(orderBuilder);
-//		String inputJson = mapToJson(order);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.ORDER_NAME_INVALID.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderNoQtyTest() throws Exception {
-//		Instrument instrument = instrumentService.getInstrumentById(1001l);
-//		openBook();
-//		String uri = "/orderbooks/1001/orders";
-//		OrderBuilder orderBuilder = new OrderBuilder();
-//		orderBuilder.setOrderName("Unit Test Order");
-//		orderBuilder.setInstrument(instrument);
-//		orderBuilder.setOrderprice(400d);
-//		orderBuilder.setOrderStatus(OrderStatus.VALID);
-//		orderBuilder.setOrderType(OrderType.LIMIT_ORDER);
-//		orderBuilder.setOrderBook(null);
-//		orderBuilder.setExecutionQuantity(2l);
-//		orderBuilder.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-//		orderBuilder.setCreatedOn(LocalDateTime.now());
-//		Order order = new Order(orderBuilder);
-//		String inputJson = mapToJson(order);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.ORDER_QUANTITY_INVALID.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderNoPriceTest() throws Exception {
-//		Instrument instrument = instrumentService.getInstrumentById(1001l);
-//		openBook();
-//		String uri = "/orderbooks/1001/orders";
-//		OrderBuilder orderBuilder = new OrderBuilder();
-//		orderBuilder.setOrderName("Unit Test Order");
-//		orderBuilder.setInstrument(instrument);
-//		orderBuilder.setOrderQuantity(200l);
-//		orderBuilder.setOrderStatus(OrderStatus.VALID);
-//		orderBuilder.setOrderType(OrderType.MARKET_ORDER);
-//		orderBuilder.setOrderBook(null);
-//		orderBuilder.setExecutionQuantity(2l);
-//		orderBuilder.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-//		orderBuilder.setCreatedOn(LocalDateTime.now());
-//		Order order = new Order(orderBuilder);
-//		String inputJson = mapToJson(order);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.ORDER_PRICE_INVALID.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderNoTypeTest() throws Exception {
-//		Instrument instrument = instrumentService.getInstrumentById(1001l);
-//		openBook();
-//		String uri = "/orderbooks/1001/orders";
-//		OrderBuilder orderBuilder = new OrderBuilder();
-//		orderBuilder.setOrderName("Unit Test Order");
-//		orderBuilder.setInstrument(instrument);
-//		orderBuilder.setOrderQuantity(200l);
-//		orderBuilder.setOrderprice(400d);
-//		orderBuilder.setOrderBook(null);
-//		orderBuilder.setExecutionQuantity(2l);
-//		orderBuilder.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-//		orderBuilder.setCreatedOn(LocalDateTime.now());
-//		Order order = new Order(orderBuilder);
-//		String inputJson = mapToJson(order);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.ORDER_TYPE_INVALID.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void newOrderDiffInstrumentTest() throws Exception {
-//		Instrument instrument = instrumentService.getInstrument("Instrument-3");
-//		String uri = "/orderbooks/1001/orders";
-//		OrderBuilder orderBuilder = new OrderBuilder();
-//		orderBuilder.setOrderName("Unit Test Order");
-//		orderBuilder.setInstrument(instrument);
-//		orderBuilder.setOrderQuantity(200l);
-//		orderBuilder.setOrderprice(400d);
-//		orderBuilder.setOrderStatus(OrderStatus.VALID);
-//		orderBuilder.setOrderType(OrderType.LIMIT_ORDER);
-//		orderBuilder.setOrderBook(null);
-//		orderBuilder.setExecutionQuantity(2l);
-//		orderBuilder.setCreatedBy(ApplicationConstants.DEFAULT_USER);
-//		orderBuilder.setCreatedOn(LocalDateTime.now());
-//		Order order = new Order(orderBuilder);
-//		String inputJson = mapToJson(order);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.ORDER_NOT_BELONG_TO_INSTRUMENT.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void addExecutionToBookTest() throws Exception {
-//		Execution execution = executionService.getExecution(1001l);
-//		execution.setExecutionId(1010l);
-//		execution.setQuantity(100l);
-//		OrderBook orderBook = orderBookService.getOrderBook(1001l);
-//		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
-//		closeBook();
-//		String uri = "/orderbooks/1001/executions";
-//		String inputJson = mapToJson(execution);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		orderBook = mapFromJson(content, OrderBook.class);
-//		assertEquals(200, status);
-//		assertEquals(2, orderBook.getExecutions().size());
-//	}
-//
-//	@Test
-//	public void addExecutionMoreThanOrderTest() throws Exception {
-//		Execution execution = executionService.getExecution(1001l);
-//		execution.setExecutionId(1010l);
-//		execution.setQuantity(250l);
-//		OrderBook orderBook = orderBookService.getOrderBook(1001l);
-//		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
-//		orderBook.setExecutions(null);
-//		orderBook.setOrderBookStatus(OrderBookStatus.OPEN);
-//		orderBookService.saveBook(orderBook);
-//		closeBook();
-//		String uri = "/orderbooks/1001/executions";
-//		String inputJson = mapToJson(execution);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		orderBook = mapFromJson(content, OrderBook.class);
-//		assertEquals(200, status);
-//		assertEquals(3, orderBook.getExecutions().size());
-//	}
-//
-//	@Test
-//	public void addExecutionToOpenBookTest() throws Exception {
-//		Execution execution = executionService.getExecution(1001l);
-//		execution.setExecutionId(1010l);
-//		openBook();
-//		String uri = "/orderbooks/1001/executions";
-//		String inputJson = mapToJson(execution);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.EXECUTION_CAN_NOT_BE_ADDED.getMessage(), message.getMessage());
-//	}
-//
-//	@Test
-//	public void addExecutionToExecutedBookTest() throws Exception {
-//		Execution execution = executionService.getExecution(1001l);
-//		execution.setExecutionId(1010l);
-//		execution.setQuantity(100l);
-//		OrderBook orderBook = orderBookService.getOrderBook(1001l);
-//		orderBook.setExecutionStatus(ExecutionStatus.NOT_EXECUTED);
-//		orderBook.setExecutions(null);
-//		orderBook.setOrderBookStatus(OrderBookStatus.OPEN);
-//		orderBookService.saveBook(orderBook);
-//		closeBook();
-//		String uri = "/orderbooks/1001/executions";
-//		String inputJson = mapToJson(execution);
-//		MvcResult mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		mvcResult = mvc.perform(
-//				MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(inputJson))
-//				.andReturn();
-//		int status = mvcResult.getResponse().getStatus();
-//		String content = mvcResult.getResponse().getContentAsString();
-//		Message message = mapFromJson(content, Message.class);
-//		assertEquals(406, status);
-//		assertEquals(ErrorMessageEnum.PARTIALLY_EXECUTED.getMessage(), message.getMessage());
-//	}
 
 }

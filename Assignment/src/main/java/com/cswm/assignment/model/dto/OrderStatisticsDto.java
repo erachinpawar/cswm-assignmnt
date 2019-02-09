@@ -2,7 +2,6 @@ package com.cswm.assignment.model.dto;
 
 import java.math.BigDecimal;
 
-
 import com.cswm.assignment.applicationutils.OrderStatus;
 import com.cswm.assignment.model.dto.OrderDto;
 

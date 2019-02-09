@@ -1,7 +1,5 @@
 package com.cswm.assignment.controller;
 
-import java.util.List;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -14,11 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.cswm.assignment.ApplicationConstants;
 import com.cswm.assignment.UrlConstants;
-import com.cswm.assignment.applicationutils.ErrorMessageEnum;
-import com.cswm.assignment.applicationutils.OrderBookStatus;
-import com.cswm.assignment.exceptions.ApplicationException;
 import com.cswm.assignment.model.dto.ExecutionDto;
 import com.cswm.assignment.model.dto.OrderBookDto;
 import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
@@ -33,28 +27,7 @@ public class OrderBookController {
 	@Autowired
 	OrderBookService orderBookService;
 	@Autowired
-	private OrderService orderService;
-
-	
-	/*
-	 * Used to get the all the order books in the system
-	 * URI : /orderbooks
-	 */
-	@RequestMapping(value = UrlConstants.URL_ALL_ORDER_BOOKS, method = RequestMethod.GET)
-	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody List<OrderBookDto> getAllOrderBooks() {
-		return orderBookService.getAllOrderBooks();
-	}
-
-	/*
-	 * Used to get a order book
-	 * URI : /orderbooks/{orderBookId}
-	 */
-	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK, method = RequestMethod.GET)
-	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDto getOrderBook(@PathVariable Long orderBookId) {
-		return orderBookService.getOrderBook(orderBookId);
-	}
+	OrderService orderService;
 
 	/*
 	 * Used to get statistics of the order book
@@ -94,7 +67,7 @@ public class OrderBookController {
 	@RequestMapping(value = UrlConstants.URL_ADD_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDto addOrderToOrderBook(@RequestBody OrderDto orderDto, @PathVariable Long orderBookId) {
+	public @ResponseBody OrderDto addOrderToOrderBook(@RequestBody OrderDto orderDto, @PathVariable Long orderBookId) {
 		return orderBookService.addOrderToOrderBook(orderBookId, orderDto);
 	}
 
@@ -118,15 +91,7 @@ public class OrderBookController {
 	public @ResponseBody OrderBookDto addExecutionToBook(@PathVariable Long orderBookId,
 			@RequestBody ExecutionDto executionDto) {
 		 OrderBookDto orderBookDto = orderBookService.addExecutionToBook(orderBookId, executionDto);
-		 if(orderBookDto.getOrderBookStatus()==OrderBookStatus.EXECUTED)
-		 {
-			 throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_EXECUTED);
-		 }
-		 else if(orderBookDto.getCreatedBy().equals(ApplicationConstants.PARTIAL_EXECUTION))
-		 {
-			 throw new ApplicationException(ErrorMessageEnum.PARTIALLY_EXECUTED);
-		 }
-		 else return orderBookDto;
+		 return orderBookDto;
 			 
 	}
 

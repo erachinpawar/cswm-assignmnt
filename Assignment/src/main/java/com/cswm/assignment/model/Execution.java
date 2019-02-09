@@ -28,7 +28,7 @@ public class Execution {
 
 	@Column(name = "price")
 	@ColumnDefault("0")
-	private BigDecimal price; 
+	private BigDecimal price;
 
 	@Column(name = "qty")
 	@ColumnDefault("0")

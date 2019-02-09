@@ -17,64 +17,67 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import com.cswm.assignment.applicationutils.OrderType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import lombok.Builder;
+import lombok.Data;
 
 @Entity
 @Table(name = "orders_inv")
+@Data
+@Builder
 public class Order {
 
 	@Id
 	@Column(name = "order_id")
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_inv_seq")
-	private Long orderId;
+	private  Long orderId;
 
 	@OneToOne
 	@JoinColumn(name = "instrument_id")
-	private Instrument instrument;
+	private  Instrument instrument;
 
 	@ManyToOne(fetch = FetchType.EAGER, optional = true)
 	@JoinColumn(name = "order_book_id", nullable = true)
 	@JsonBackReference
-	private OrderBook orderBook;
+	private  OrderBook orderBook;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "orderDetails_id")
-	private OrderDetails orderDetails;
+	private  OrderDetails orderDetails;
 
 	@Column(name = "order_quantity")
 	@ColumnDefault("0")
-	private Long orderQuantity;
+	private  Long orderQuantity;
 
 	@Column(name = "order_price")
-	@ColumnDefault("0")
-	private BigDecimal orderprice;
+	@ColumnDefault("0") // 
+	private  BigDecimal orderprice;
 
 	@Column(name = "created_by")
-	private String createdBy;
+	private  String createdBy;
 
 	@Column(name = "created_on")
-	private LocalDateTime createdOn;
-
+	private  LocalDateTime createdOn;
+	
 	public Order() {
 	}
+	
 
-	public Order(OrderBuilder orderBuilder) {
-		super();
-		this.orderId = orderBuilder.getOrderId();
-		this.instrument = orderBuilder.getInstrument();
-		this.orderBook = orderBuilder.getOrderBook();
-		this.orderDetails = orderBuilder.getOrderDetails();
-		this.orderQuantity = orderBuilder.getOrderQuantity();
-		this.orderprice = orderBuilder.getOrderprice();
-		if (null == orderBuilder.getOrderprice() || orderBuilder.getOrderprice().equals(BigDecimal.ZERO))
-			this.getOrderDetails().setOrderType(OrderType.MARKET_ORDER);
-		else
-			this.getOrderDetails().setOrderType(OrderType.LIMIT_ORDER);
-			
-		this.createdBy = orderBuilder.getCreatedBy();
-		this.createdOn = orderBuilder.getCreatedOn();
+	public Order(Long orderId, Instrument instrument, OrderBook orderBook, OrderDetails orderDetails,
+			Long orderQuantity, BigDecimal orderprice, String createdBy, LocalDateTime createdOn) {
+		this.orderId = orderId;
+		this.instrument = instrument;
+		this.orderBook = orderBook;
+		this.orderDetails = orderDetails;
+		this.orderQuantity = orderQuantity;
+		this.orderprice = orderprice;
+		this.createdBy = createdBy;
+		this.createdOn = createdOn;
 	}
+
+
+
 
 	public Long getOrderId() {
 		return orderId;
@@ -82,6 +85,14 @@ public class Order {
 
 	public Instrument getInstrument() {
 		return instrument;
+	}
+
+	public OrderBook getOrderBook() {
+		return orderBook;
+	}
+
+	public OrderDetails getOrderDetails() {
+		return orderDetails;
 	}
 
 	public Long getOrderQuantity() {
@@ -100,12 +111,11 @@ public class Order {
 		return createdOn;
 	}
 
-	public OrderBook getOrderBook() {
-		return orderBook;
-	}
-
-	public OrderDetails getOrderDetails() {
-		return orderDetails;
+	@Override
+	public String toString() {
+		return "Order [orderId=" + orderId + ", instrument=" + instrument + ", orderBook=" + orderBook
+				+ ", orderDetails=" + orderDetails + ", orderQuantity=" + orderQuantity + ", orderprice=" + orderprice
+				+ ", createdBy=" + createdBy + ", createdOn=" + createdOn + "]";
 	}
 
 }

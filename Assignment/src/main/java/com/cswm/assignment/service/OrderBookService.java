@@ -1,7 +1,5 @@
 package com.cswm.assignment.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.cswm.assignment.model.dto.ExecutionDto;
@@ -12,13 +10,10 @@ import com.cswm.assignment.model.dto.OrderDto;
 @Service
 public interface OrderBookService {
 
-	List<OrderBookDto> getAllOrderBooks();
-
-	OrderBookDto getOrderBook(Long orderBookId);
 
 	OrderBookDto createOrderBook(OrderBookDto orderBookDto);
 
-	OrderBookDto addOrderToOrderBook(Long orderBookId, OrderDto orderDto);
+	OrderDto addOrderToOrderBook(Long orderBookId, OrderDto orderDto);
 
 	OrderBookDto closeOrderBook(Long orderBookId);
 
@@ -26,6 +21,5 @@ public interface OrderBookService {
 
 	OrderBookStatisticsDto getOrderBookStats(Long orderBookId);
 
-	OrderBookDto createDefaultOrderBook();
 
 }

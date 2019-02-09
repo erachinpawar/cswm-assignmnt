@@ -3,9 +3,6 @@ package com.cswm.assignment.model.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import org.modelmapper.ModelMapper;
-
-import com.cswm.assignment.applicationutils.OrderType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 public class OrderDto {
@@ -26,27 +23,8 @@ public class OrderDto {
 	private String createdBy;
 
 	private LocalDateTime createdOn;
-	
-	
 
 	public OrderDto() {
-	}
-
-	public OrderDto(OrderBuilderDto orderBuilder) {
-		super();
-		this.orderId = orderBuilder.getOrderId();
-		this.instrument = new ModelMapper().map(orderBuilder.getInstrument(), InstrumentDto.class);
-		this.orderBook = new ModelMapper().map(orderBuilder.getOrderBook(), OrderBookDto.class);
-		this.orderDetails = new ModelMapper().map(orderBuilder.getOrderDetails(), OrderDetailsDto.class);
-		this.orderQuantity = orderBuilder.getOrderQuantity();
-		this.orderprice = orderBuilder.getOrderprice();
-		if (null == orderBuilder.getOrderprice() || orderBuilder.getOrderprice().equals(BigDecimal.ZERO))
-			this.getOrderDetails().setOrderType(OrderType.MARKET_ORDER);
-		else
-			this.getOrderDetails().setOrderType(OrderType.LIMIT_ORDER);
-
-		this.createdBy = orderBuilder.getCreatedBy();
-		this.createdOn = orderBuilder.getCreatedOn();
 	}
 
 	public Long getOrderId() {

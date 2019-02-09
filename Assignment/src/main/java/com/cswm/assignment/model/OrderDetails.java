@@ -23,6 +23,7 @@ public class OrderDetails {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_details_inv_seq")
 	private Long orderDetailsId;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "order_status")
 	private OrderStatus orderStatus;
 
@@ -33,6 +34,8 @@ public class OrderDetails {
 	@Column(name = "execution_quantity")
 	@ColumnDefault("0")
 	private Long executionQuantity;
+	
+	public OrderDetails() {}
 
 	public Long getOrderDetailsId() {
 		return orderDetailsId;

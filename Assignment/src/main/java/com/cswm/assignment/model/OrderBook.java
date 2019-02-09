@@ -20,11 +20,9 @@ import javax.persistence.Table;
 import com.cswm.assignment.applicationutils.OrderBookStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 @Entity
-@ApiModel
 @Table(name = "order_book_inv")
 @Data
 public class OrderBook {
