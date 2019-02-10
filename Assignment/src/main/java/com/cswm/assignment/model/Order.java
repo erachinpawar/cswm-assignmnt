@@ -31,38 +31,38 @@ public class Order {
 	@Id
 	@Column(name = "order_id")
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_inv_seq")
-	private  Long orderId;
+	private Long orderId;
 
 	@OneToOne
 	@JoinColumn(name = "instrument_id")
-	private  Instrument instrument;
+	private final Instrument instrument;
 
 	@ManyToOne(fetch = FetchType.EAGER, optional = true)
 	@JoinColumn(name = "order_book_id", nullable = true)
 	@JsonBackReference
-	private  OrderBook orderBook;
+	private final OrderBook orderBook;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "orderDetails_id")
-	private  OrderDetails orderDetails;
+	private final OrderDetails orderDetails;
 
 	@Column(name = "order_quantity")
 	@ColumnDefault("0")
-	private  Long orderQuantity;
+	private final Long orderQuantity;
 
 	@Column(name = "order_price")
-	@ColumnDefault("0") // 
-	private  BigDecimal orderprice;
+	@ColumnDefault("0") //
+	private final BigDecimal orderprice;
 
 	@Column(name = "created_by")
-	private  String createdBy;
+	private final String createdBy;
 
 	@Column(name = "created_on")
-	private  LocalDateTime createdOn;
-	
+	private final LocalDateTime createdOn;
+
 	public Order() {
+		this(null, null, null, null, null, null, null, null);
 	}
-	
 
 	public Order(Long orderId, Instrument instrument, OrderBook orderBook, OrderDetails orderDetails,
 			Long orderQuantity, BigDecimal orderprice, String createdBy, LocalDateTime createdOn) {
@@ -75,9 +75,6 @@ public class Order {
 		this.createdBy = createdBy;
 		this.createdOn = createdOn;
 	}
-
-
-
 
 	public Long getOrderId() {
 		return orderId;
@@ -113,9 +110,9 @@ public class Order {
 
 	@Override
 	public String toString() {
-		return "Order [orderId=" + orderId + ", instrument=" + instrument + ", orderBook=" + orderBook
-				+ ", orderDetails=" + orderDetails + ", orderQuantity=" + orderQuantity + ", orderprice=" + orderprice
-				+ ", createdBy=" + createdBy + ", createdOn=" + createdOn + "]";
+		return "Order [orderId=" + orderId + ", instrument=" + instrument + ", orderDetails=" + orderDetails
+				+ ", orderQuantity=" + orderQuantity + ", orderprice=" + orderprice + ", createdBy=" + createdBy
+				+ ", createdOn=" + createdOn + "]";
 	}
 
 }

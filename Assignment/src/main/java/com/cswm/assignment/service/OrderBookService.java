@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.cswm.assignment.model.dto.ExecutionDto;
 import com.cswm.assignment.model.dto.OrderBookDto;
 import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
+import com.cswm.assignment.model.dto.OrderBookValidInValidStatistics;
 import com.cswm.assignment.model.dto.OrderDto;
 
 @Service
@@ -20,6 +21,8 @@ public interface OrderBookService {
 	OrderBookDto addExecutionToBook(Long orderBookId, ExecutionDto executionDto);
 
 	OrderBookStatisticsDto getOrderBookStats(Long orderBookId);
+
+	OrderBookValidInValidStatistics getOrderBookValidInvalidOrdersStats(Long orderBookId);
 
 
 }

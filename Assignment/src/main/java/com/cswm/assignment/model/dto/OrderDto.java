@@ -93,9 +93,9 @@ public class OrderDto {
 
 	@Override
 	public String toString() {
-		return "Order [orderId=" + orderId + ", instrument=" + instrument + ", orderBook=" + orderBook
-				+ ", orderDetails=" + orderDetails + ", orderQuantity=" + orderQuantity + ", orderprice=" + orderprice
-				+ ", createdBy=" + createdBy + ", createdOn=" + createdOn + "]";
+		return "Order [orderId=" + orderId + ", instrument=" + instrument + ",  orderDetails=" + orderDetails
+				+ ", orderQuantity=" + orderQuantity + ", orderprice=" + orderprice + ", createdBy=" + createdBy
+				+ ", createdOn=" + createdOn + "]";
 	}
 
 }

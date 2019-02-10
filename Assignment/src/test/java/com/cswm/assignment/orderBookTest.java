@@ -23,7 +23,9 @@ import com.cswm.assignment.model.dto.ExecutionDto;
 import com.cswm.assignment.model.dto.InstrumentDto;
 import com.cswm.assignment.model.dto.OrderBookDto;
 import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
+import com.cswm.assignment.model.dto.OrderBookValidInValidStatistics;
 import com.cswm.assignment.model.dto.OrderDto;
+import com.cswm.assignment.model.dto.OrderStatisticsDto;
 
 @FixMethodOrder(MethodSorters.JVM)
 public class orderBookTest extends AbstractTest {
@@ -419,19 +421,42 @@ public class orderBookTest extends AbstractTest {
 		assertEquals(200, status);
 		assertEquals(4l, orderBookStatisticsDto.getTotalNoOfOrders().longValue());
 		assertEquals(200l, orderBookStatisticsDto.getTotalNoofAccuOrders().longValue());
-		assertEquals(3l, orderBookStatisticsDto.getValidOrderCount().longValue());
-		assertEquals(1l, orderBookStatisticsDto.getInValidOrderCount().longValue());
-		assertEquals(20l, orderBookStatisticsDto.getInvalidDemand().longValue());
-		assertEquals(180l, orderBookStatisticsDto.getValidDemand().longValue());
-		assertEquals(180l, orderBookStatisticsDto.getExecutionQty().longValue());
-		assertEquals(0, BigDecimal.valueOf(1600l).compareTo(orderBookStatisticsDto.getExecutionPrice()));
-		assertEquals(4l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.EARLIEST_ORDER).getOrderId().longValue());
-		assertEquals(7l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
-		assertEquals(6l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
-		assertEquals(4l, orderBookStatisticsDto.getOrderStats().get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
-		
-	}	
-	
+		assertEquals(7l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.LATEST_ORDER)
+				.getOrderId().longValue());
+		assertEquals(6l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.BIGGEST_ORDER)
+				.getOrderId().longValue());
+		assertEquals(4l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.SMALLEST_ORDER)
+				.getOrderId().longValue());
+
+	}
+
+	@Test
+	public void getOrderBookValidInValidStatistics() throws Exception {
+		String uri = "/orderbooks/1003/validInvalidstastitics";
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderBookValidInValidStatistics bookValidInValidStatistics = mapFromJson(content,
+				OrderBookValidInValidStatistics.class);
+		assertEquals(200, status);
+		assertEquals(4l, bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoOfOrders().longValue());
+		assertEquals(200l, bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoofAccuOrders().longValue());
+		assertEquals(3l, bookValidInValidStatistics.getValidOrderCount().longValue());
+		assertEquals(1l, bookValidInValidStatistics.getInValidOrderCount().longValue());
+		assertEquals(20l, bookValidInValidStatistics.getInValidDemand().longValue());
+		assertEquals(180l, bookValidInValidStatistics.getValidDemand().longValue());
+		assertEquals(180l, bookValidInValidStatistics.getExecutionQty().longValue());
+		assertEquals(0, BigDecimal.valueOf(1600l).compareTo(bookValidInValidStatistics.getTotalExecutionPrice()));
+		assertEquals(7l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats()
+				.get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
+		assertEquals(6l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats()
+				.get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
+		assertEquals(4l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats()
+				.get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
+
+	}
+
 	@Test
 	public void getOrderBookStatsNtFoundTest() throws Exception {
 		String uri = "/orderbooks/2004/stastitics";
@@ -444,4 +469,16 @@ public class orderBookTest extends AbstractTest {
 		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND.getMessage(), message.getMessage());
 	}
 
+	@Test
+	public void getOrderStats() throws Exception {
+		String uri = "/orderbooks/1003/orderStatistics/5";
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
+				.andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderStatisticsDto orderStatisticsDto = mapFromJson(content, OrderStatisticsDto.class);
+		assertEquals(200, status);
+		assertEquals(2000l, orderStatisticsDto.getExecutionPrice().longValue());
+
+	}
 }

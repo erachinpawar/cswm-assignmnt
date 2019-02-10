@@ -15,26 +15,25 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.cswm.assignment.service.OrderBookService;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
 @RunWith(SpringRunner.class)
-@EntityScan(basePackageClasses = {AssignmentApplication.class, Jsr310JpaConverters.class})
+@EntityScan(basePackageClasses = { AssignmentApplication.class, Jsr310JpaConverters.class })
 @SpringBootTest(classes = AssignmentApplication.class)
 public class AbstractTest {
 
-	
-	
 	@Autowired
 	OrderBookService orderBookService;
-	
-	
+
 	protected MockMvc mvc;
 	@Autowired
 	WebApplicationContext webApplicationContext;
-
 
 	@Before
 	public void setUp() {
@@ -43,7 +42,8 @@ public class AbstractTest {
 
 	protected String mapToJson(Object obj) throws JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
-		 objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.registerModule(new JavaTimeModule()).enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
+				.registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
 		return objectMapper.writeValueAsString(obj);
 	}
 
@@ -51,7 +51,8 @@ public class AbstractTest {
 			throws JsonParseException, JsonMappingException, IOException {
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		 objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.registerModule(new JavaTimeModule()).enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
+				.registerModule(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES));
 		return objectMapper.readValue(json, clazz);
 	}
 

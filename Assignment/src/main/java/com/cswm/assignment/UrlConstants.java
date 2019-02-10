@@ -10,6 +10,7 @@ public class UrlConstants {
 		throw new IllegalStateException("Constants class can not be instantiated");
 	}
 	public static final  String  URL_GET_ORDER_BOOK_STATISTICS="/orderbooks/{orderBookId}/stastitics";
+	public static final  String  URL_GET_ORDER_BOOK_VALID_INVALID_STATISTICS="/orderbooks/{orderBookId}/validInvalidstastitics";
 	public static final  String  URL_GET_ORDER_STATISTICS="/orderbooks/{orderBookId}/orderStatistics/{orderId}";
 	public static final  String  URL_CREATE_ORDER_BOOK="/orderbooks/create";
 	public static final  String  URL_ADD_ORDER_BOOK="/orderbooks/{orderBookId}/orders";

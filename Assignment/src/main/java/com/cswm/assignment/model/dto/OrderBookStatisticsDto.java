@@ -19,12 +19,7 @@ public class OrderBookStatisticsDto {
 	private Long totalNoOfOrders;
 	private Long totalNoofAccuOrders;
 	private Map<OrderTypesInStatistics, OrderDto> orderTypesInStats;
-	private Long validOrderCount;
-	private Long inValidOrderCount;
-	private Long validDemand;
-	private Long invalidDemand;
-	private Long executionQty;
-	private BigDecimal executionPrice;
+	Map<BigDecimal, Long> limitPriceVsDemandTable;
 
 	public Long getTotalNoOfOrders() {
 		return totalNoOfOrders;
@@ -42,69 +37,27 @@ public class OrderBookStatisticsDto {
 		this.totalNoofAccuOrders = totalNoofAccuOrders;
 	}
 
-	public Map<OrderTypesInStatistics, OrderDto> getOrderStats() {
+	public Map<OrderTypesInStatistics, OrderDto> getOrderTypesInStats() {
 		return orderTypesInStats;
 	}
 
-	public void setOrderStats(Map<OrderTypesInStatistics, OrderDto> orderStats) {
-		this.orderTypesInStats = orderStats;
+	public void setOrderTypesInStats(Map<OrderTypesInStatistics, OrderDto> orderTypesInStats) {
+		this.orderTypesInStats = orderTypesInStats;
 	}
 
-	public Long getValidOrderCount() {
-		return validOrderCount;
+	public Map<BigDecimal, Long> getLimitPriceVsDemandTable() {
+		return limitPriceVsDemandTable;
 	}
 
-	public void setValidOrderCount(Long validOrderCount) {
-		this.validOrderCount = validOrderCount;
-	}
-
-	public Long getInValidOrderCount() {
-		return inValidOrderCount;
-	}
-
-	public void setInValidOrderCount(Long inValidOrderCount) {
-		this.inValidOrderCount = inValidOrderCount;
-	}
-
-	public Long getValidDemand() {
-		return validDemand;
-	}
-
-	public void setValidDemand(Long validDemand) {
-		this.validDemand = validDemand;
-	}
-
-	public Long getInvalidDemand() {
-		return invalidDemand;
-	}
-
-	public void setInvalidDemand(Long invalidDemand) {
-		this.invalidDemand = invalidDemand;
-	}
-
-	public Long getExecutionQty() {
-		return executionQty;
-	}
-
-	public void setExecutionQty(Long executionQty) {
-		this.executionQty = executionQty;
-	}
-
-	public BigDecimal getExecutionPrice() {
-		return executionPrice;
-	}
-
-	public void setExecutionPrice(BigDecimal executionPrice) {
-		this.executionPrice = executionPrice;
+	public void setLimitPriceVsDemandTable(Map<BigDecimal, Long> limitPriceVsDemandTable) {
+		this.limitPriceVsDemandTable = limitPriceVsDemandTable;
 	}
 
 	@Override
 	public String toString() {
 		return "OrderBookStatisticsDto [totalNoOfOrders=" + totalNoOfOrders + ", totalNoofAccuOrders="
-				+ totalNoofAccuOrders + ", orderTypesInStats=" + orderTypesInStats + ", validOrderCount="
-				+ validOrderCount + ", inValidOrderCount=" + inValidOrderCount + ", validDemand=" + validDemand
-				+ ", invalidDemand=" + invalidDemand + ", executionQty=" + executionQty + ", executionPrice="
-				+ executionPrice + "]";
+				+ totalNoofAccuOrders + ", orderTypesInStats=" + orderTypesInStats + ", limitPriceVsDemandTable="
+				+ limitPriceVsDemandTable + "]";
 	}
 
 }

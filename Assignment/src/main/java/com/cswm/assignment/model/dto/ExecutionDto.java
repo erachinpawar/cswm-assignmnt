@@ -74,8 +74,7 @@ public class ExecutionDto {
 	@Override
 	public String toString() {
 		return "ExecutionDto [executionId=" + executionId + ", price=" + price + ", quantity=" + quantity
-				+ ", orderBook=" + orderBook + ", createdBy=" + createdBy + ", createdOn=" + createdOn + "]";
+				+ ", createdBy=" + createdBy + ", createdOn=" + createdOn + "]";
 	}
-
 
 }

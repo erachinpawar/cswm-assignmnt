@@ -16,6 +16,7 @@ import com.cswm.assignment.UrlConstants;
 import com.cswm.assignment.model.dto.ExecutionDto;
 import com.cswm.assignment.model.dto.OrderBookDto;
 import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
+import com.cswm.assignment.model.dto.OrderBookValidInValidStatistics;
 import com.cswm.assignment.model.dto.OrderDto;
 import com.cswm.assignment.model.dto.OrderStatisticsDto;
 import com.cswm.assignment.service.OrderBookService;
@@ -37,6 +38,16 @@ public class OrderBookController {
 	@Produces(MediaType.APPLICATION_JSON)
 	public @ResponseBody OrderBookStatisticsDto getOrderBookStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookStats(orderBookId);
+	}
+	
+	/*
+	 * Used to get valid invalid statistics of the order book 
+	 * URI : /orderbooks/{orderBookId}/validInvalidstastitics
+	 */
+	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_VALID_INVALID_STATISTICS, method = RequestMethod.GET)
+	@Produces(MediaType.APPLICATION_JSON)
+	public @ResponseBody OrderBookValidInValidStatistics getOrderBookValidInvalidOrdersStats(@PathVariable Long orderBookId) {
+		return orderBookService.getOrderBookValidInvalidOrdersStats(orderBookId);
 	}
 
 	/*
