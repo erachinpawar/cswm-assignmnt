@@ -41,7 +41,7 @@ public class OrderBookController {
 	 */
 	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_STATISTICS, method = RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Get order book statistics for a order book id number", response = OrderBookStatisticsDto.class)
+	@ApiOperation(value = "Get order book statistics for a order book id", response = OrderBookStatisticsDto.class)
 	public @ResponseBody OrderBookStatisticsDto getOrderBookStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookStats(orderBookId);
 	}
@@ -81,7 +81,7 @@ public class OrderBookController {
 	 * @param orderBookDto
 	 * @return
 	 */
-	@ApiOperation(value = "Create order book in the system ", response = OrderBookDto.class)
+	@ApiOperation(value = "Create order book ", response = OrderBookDto.class)
 	@RequestMapping(value = UrlConstants.URL_CREATE_ORDER_BOOK, method = RequestMethod.POST)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -96,7 +96,7 @@ public class OrderBookController {
 	 * @param orderBookId
 	 * @return
 	 */
-	@ApiOperation(value = "add order to order book in the system ", response = OrderDto.class)
+	@ApiOperation(value = "add order to order book ", response = OrderDto.class)
 	@RequestMapping(value = UrlConstants.URL_ADD_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -110,7 +110,7 @@ public class OrderBookController {
 	 * @param orderBookId
 	 * @return
 	 */
-	@ApiOperation(value = "Close order book so that no more order are not allowed and executions can be added", response = OrderBookDto.class)
+	@ApiOperation(value = "Close order book so that addition of more orders is not allowed and executions can be added", response = OrderBookDto.class)
 	@RequestMapping(value = UrlConstants.URL_CLOSE_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
