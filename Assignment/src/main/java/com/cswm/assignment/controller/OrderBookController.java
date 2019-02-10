@@ -48,7 +48,7 @@ public class OrderBookController {
 
 	/**
 	 * Used to get valid invalid statistics of the order book URI
-	 * :/orderbooks/{orderBookId}/validInvalidstastitics
+	 * :/orderbooks/{orderBookId}/detailedstastitics
 	 * 
 	 * @param orderBookId
 	 * @return
