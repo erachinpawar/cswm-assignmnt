@@ -432,7 +432,7 @@ public class orderBookTest extends AbstractTest {
 
 	@Test
 	public void getOrderBookValidInValidStatistics() throws Exception {
-		String uri = "/orderbooks/1003/validInvalidstastitics";
+		String uri = "/orderbooks/1003/detailedstastitics";
 		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
 				.andReturn();
 		int status = mvcResult.getResponse().getStatus();

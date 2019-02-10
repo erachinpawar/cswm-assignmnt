@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cswm.assignment.applicationutils.ErrorMessageEnum;
-import com.cswm.assignment.applicationutils.OrderStatus;
-import com.cswm.assignment.applicationutils.OrderType;
 import com.cswm.assignment.configuration.CustomModelMapper;
 import com.cswm.assignment.exceptions.NotFoundException;
 import com.cswm.assignment.model.Execution;
@@ -24,6 +22,10 @@ import com.cswm.assignment.model.dto.OrderStatisticsDto;
 import com.cswm.assignment.repository.OrderRepository;
 import com.cswm.assignment.service.OrderService;
 
+/**
+ * @author sachinpawar
+ *
+ */
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -31,33 +33,37 @@ public class OrderServiceImpl implements OrderService {
 	private OrderRepository orderRepository;
 	private final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-	///
+	
+	/**
+	 * Sorts the list of the valid orders based on the order quantity. 
+	 * This is used for the distribution of the remaining partial executions to the lowest quantity order first.
+	 * @param validOrders
+	 * @return Sorted list of valid orders 
+	 */
 	private List<OrderDto> sortOrders(List<OrderDto> validOrders) {
 		logger.info("sortOrders() Method called with argument :: (" + validOrders.toString() + ");");
-		validOrders.sort((a, b) -> Long.compare(
-				(long) (null == a.getOrderDetails().getExecutionQuantity() ? 0.0
-						: a.getOrderDetails().getExecutionQuantity()),
-				(long) (null == b.getOrderDetails().getExecutionQuantity() ? 0.0
-						: b.getOrderDetails().getExecutionQuantity())));
+		validOrders.sort((a, b) -> Long.compare((long) (null == a.getOrderDetails().getExecutionQuantity() ? 0.0 : a.getOrderDetails().getExecutionQuantity()),
+				(long) (null == b.getOrderDetails().getExecutionQuantity() ? 0.0 : b.getOrderDetails().getExecutionQuantity())));
 		logger.info("sortOrders() Method returned value :: (" + validOrders.toString() + ");");
 		return validOrders;
 	}
 
+	
+	
+	/* (non-Javadoc)
+	 * @see com.cswm.assignment.service.OrderService#addExecutionQuantityToOrders(java.util.Set, java.lang.Long, java.lang.Long)
+	 */
 	@Override
-	public synchronized List<OrderDto> addExecutionQuantityToOrders(Set<OrderDto> validOrdersDtos, Long accumltdOrders,
-			Long effectiveQuanty) {
-		logger.info("addExecutionQuantityToOrders() Method called with argument :: (" + validOrdersDtos.toString() + ","
-				+ accumltdOrders + "," + effectiveQuanty + ");");
+	public synchronized List<OrderDto> addExecutionQuantityToOrders(Set<OrderDto> validOrdersDtos, Long accumltdOrders, Long effectiveQuanty) {
+		logger.info("addExecutionQuantityToOrders() Method called with argument :: (" + validOrdersDtos.toString() + "," + accumltdOrders + "," + effectiveQuanty + ");");
 		List<OrderDto> updatedValidOrderDtos = new ArrayList<>();
 		Long addedExecution = 0l;
 		Long updatedToavalidOrder = updateTotalValidOrders(accumltdOrders, validOrdersDtos);
 		for (OrderDto orderDto : validOrdersDtos) {
 			Long proRataQtyForOrder = (long) (orderDto.getOrderQuantity() * effectiveQuanty) / updatedToavalidOrder;
-			Long updatedExecutiontQty = (null == orderDto.getOrderDetails().getExecutionQuantity() ? 0
-					: orderDto.getOrderDetails().getExecutionQuantity()) + proRataQtyForOrder;
+			Long updatedExecutiontQty = (null == orderDto.getOrderDetails().getExecutionQuantity() ? 0 : orderDto.getOrderDetails().getExecutionQuantity()) + proRataQtyForOrder;
 			if (updatedExecutiontQty >= orderDto.getOrderQuantity()) {
-				addedExecution = addedExecution + orderDto.getOrderQuantity()
-						- orderDto.getOrderDetails().getExecutionQuantity();
+				addedExecution = addedExecution + orderDto.getOrderQuantity() - orderDto.getOrderDetails().getExecutionQuantity();
 				orderDto.getOrderDetails().setExecutionQuantity(orderDto.getOrderQuantity());
 			} else {
 				orderDto.getOrderDetails().setExecutionQuantity(updatedExecutiontQty);
@@ -72,14 +78,18 @@ public class OrderServiceImpl implements OrderService {
 			Order order = CustomModelMapper.getOrderModelMapper().map(orderDto, Order.class);
 			orderRepository.save(order);
 		}
-		logger.info(
-				"addExecutionQuantityToOrders() Method returned value :: (" + updatedValidOrderDtos.toString() + ");");
+		logger.info("addExecutionQuantityToOrders() Method returned value :: (" + updatedValidOrderDtos.toString() + ");");
 		return updatedValidOrderDtos;
 	}
 
+	/**
+	 * Method to sum up all the valid order quantity for executing execution
+	 * @param accumltdOrders
+	 * @param validOrdersDtos
+	 * @return accumulated valid order quantity.
+	 */
 	private Long updateTotalValidOrders(Long accumltdOrders, Set<OrderDto> validOrdersDtos) {
-		logger.info("updateTotalValidOrders() Method called with argument :: (" + accumltdOrders + "," + validOrdersDtos
-				+ ");");
+		logger.info("updateTotalValidOrders() Method called with argument :: (" + accumltdOrders + "," + validOrdersDtos + ");");
 		for (OrderDto orderDto : validOrdersDtos) {
 			if (orderDto.getOrderDetails().getExecutionQuantity() >= orderDto.getOrderQuantity())
 				accumltdOrders = accumltdOrders - orderDto.getOrderQuantity();
@@ -88,15 +98,19 @@ public class OrderServiceImpl implements OrderService {
 		return accumltdOrders;
 	}
 
-	private List<OrderDto> completeDeltaQty(Long addedExecution, Long effectiveQuanty,
-			List<OrderDto> updatedValidOrderDtos) {
-		logger.info("completeDeltaQty() Method called with argument :: (" + addedExecution + "," + effectiveQuanty + ","
-				+ updatedValidOrderDtos.toString() + ");");
+	/**
+	 * in case if there is still remaining execution quantity after equal distribution this method is used to distribute reamining executions
+	 * @param addedExecution
+	 * @param effectiveQuanty
+	 * @param updatedValidOrderDtos
+	 * @return List of the orders with updated execution quantity.
+	 */
+	private List<OrderDto> completeDeltaQty(Long addedExecution, Long effectiveQuanty, List<OrderDto> updatedValidOrderDtos) {
+		logger.info("completeDeltaQty() Method called with argument :: (" + addedExecution + "," + effectiveQuanty + "," + updatedValidOrderDtos.toString() + ");");
 		List<OrderDto> updatedValidOrderList = new ArrayList<>();
 		for (OrderDto orderDto : updatedValidOrderDtos) {
 			if (addedExecution.equals(effectiveQuanty)
-					|| ((!addedExecution.equals(effectiveQuanty)) && (orderDto.getOrderQuantity()
-							.longValue() <= orderDto.getOrderDetails().getExecutionQuantity().longValue()))) {
+					|| ((!addedExecution.equals(effectiveQuanty)) && (orderDto.getOrderQuantity().longValue() <= orderDto.getOrderDetails().getExecutionQuantity().longValue()))) {
 				updatedValidOrderList.add(orderDto);
 			} else {
 				orderDto.getOrderDetails().setExecutionQuantity(orderDto.getOrderDetails().getExecutionQuantity() + 1);
@@ -108,18 +122,19 @@ public class OrderServiceImpl implements OrderService {
 		return updatedValidOrderList;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.cswm.assignment.service.OrderService#getOrderStats(java.lang.Long)
+	 */
 	@Override
-	public OrderStatisticsDto getOrderStats(Long orderId) {
-		logger.info("getOrderStats() Method called with argument :: (" + orderId +");");
+	public synchronized OrderStatisticsDto getOrderStats(Long orderId) {
+		logger.info("getOrderStats() Method called with argument :: (" + orderId + ");");
 		OrderStatisticsDto orderStatsVo = new OrderStatisticsDto();
-		Order order = orderRepository.findFirstByOrderId(orderId)
-				.orElseThrow(() -> new NotFoundException(ErrorMessageEnum.ORDER_NOT_FOUND));
+		Order order = orderRepository.findFirstByOrderId(orderId).orElseThrow(() -> new NotFoundException(ErrorMessageEnum.ORDER_NOT_FOUND));
 		orderStatsVo.setOrder(new ModelMapper().map(order, com.cswm.assignment.model.dto.OrderDto.class));
 		if (!CollectionUtils.isEmpty(order.getOrderBook().getExecutions())) {
 			Execution execution = order.getOrderBook().getExecutions().iterator().next();
-			orderStatsVo.setExecutionPrice((null == order.getOrderDetails().getExecutionQuantity() ? BigDecimal.ZERO
-					: BigDecimal.valueOf(order.getOrderDetails().getExecutionQuantity()))
-							.multiply(execution.getPrice()));
+			orderStatsVo.setExecutionPrice(
+					(null == order.getOrderDetails().getExecutionQuantity() ? BigDecimal.ZERO : BigDecimal.valueOf(order.getOrderDetails().getExecutionQuantity())).multiply(execution.getPrice()));
 		}
 		logger.info("getOrderStats() Method returned value :: (" + orderStatsVo + ");");
 		return orderStatsVo;

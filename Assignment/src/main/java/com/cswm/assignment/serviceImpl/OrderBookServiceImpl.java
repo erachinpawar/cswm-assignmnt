@@ -47,6 +47,10 @@ import com.cswm.assignment.repository.OrderRepository;
 import com.cswm.assignment.service.OrderBookService;
 import com.cswm.assignment.service.OrderService;
 
+/**
+ * @author sachinpawar
+ *
+ */
 @Service
 @Transactional
 public class OrderBookServiceImpl implements OrderBookService {
@@ -70,22 +74,30 @@ public class OrderBookServiceImpl implements OrderBookService {
 	private OrderDetailsRepository orderDetailsRepository;
 	private final Logger logger = LoggerFactory.getLogger(OrderBookServiceImpl.class);
 
+	
+	
+	/**
+	 * get the order book details of particular order book id
+	 * @param orderBookId
+	 * @return OrderBookDto
+	 */
 	private OrderBookDto getOrderBook(Long orderBookId) {
 		logger.info("getOrderBook() Method called with argument :: " + orderBookId);
-		OrderBook orderBook = orderBookRepository.findById(orderBookId)
-				.orElseThrow(() -> new NotFoundException(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND));
+		OrderBook orderBook = orderBookRepository.findById(orderBookId).orElseThrow(() -> new NotFoundException(ErrorMessageEnum.ORDER_BOOK_NOT_FOUND));
 		logger.info("getOrderBook() Method returned value  :: " + orderBook.toString());
 		return new ModelMapper().map(orderBook, OrderBookDto.class);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.cswm.assignment.service.OrderBookService#createOrderBook(com.cswm.assignment.model.dto.OrderBookDto)
+	 */
 	@Override
 	public synchronized OrderBookDto createOrderBook(OrderBookDto orderBookDto) {
 		logger.info("createOrderBook() Method called with argument :: " + orderBookDto.toString());
 		if (null == orderBookDto.getInstrument() || null == orderBookDto.getInstrument().getInstrumentId())
 			throw new ApplicationException(ErrorMessageEnum.BOOK_WITHOUT_INSTRUMENT);
 		Optional<Instrument> instrument = instrumentRepository.findById(orderBookDto.getInstrument().getInstrumentId());
-		if (instrument.isPresent() && orderBookRepository.findFirstByInstrumentAndOrderBookStatusNot(instrument.get(),
-				OrderBookStatus.EXECUTED) != null)
+		if (instrument.isPresent() && orderBookRepository.findFirstByInstrumentAndOrderBookStatusNot(instrument.get(), OrderBookStatus.EXECUTED) != null)
 			throw new ApplicationException(ErrorMessageEnum.NOT_EXECUTED_ORDER_BOOK_PRESENT);
 		orderBookDto.getInstrument().setCreatedBy(ApplicationConstants.DEFAULT_USER);
 		orderBookDto.getInstrument().setCreatedOn(LocalDateTime.now());
@@ -98,10 +110,12 @@ public class OrderBookServiceImpl implements OrderBookService {
 		return new ModelMapper().map(orderBook, OrderBookDto.class);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.cswm.assignment.service.OrderBookService#addOrderToOrderBook(java.lang.Long, com.cswm.assignment.model.dto.OrderDto)
+	 */
 	@Override
 	public synchronized OrderDto addOrderToOrderBook(Long orderBookId, OrderDto orderDto) {
-		logger.info(
-				"addOrderToOrderBook() Method called with argument :: (" + orderBookId + orderDto.toString() + ");");
+		logger.info("addOrderToOrderBook() Method called with argument :: (" + orderBookId + orderDto.toString() + ");");
 		if (null == orderDto.getOrderQuantity() || orderDto.getOrderQuantity() <= 0l)
 			throw new ApplicationException(ErrorMessageEnum.ORDER_QUANTITY_INVALID);
 		if (null == orderDto.getInstrument() || StringUtils.isEmpty(orderDto.getInstrument().getInstrumentId()))
@@ -113,10 +127,13 @@ public class OrderBookServiceImpl implements OrderBookService {
 			throw new ApplicationException(ErrorMessageEnum.ORDER_NOT_BELONG_TO_INSTRUMENT);
 		if (null == orderDto.getOrderDetails())
 			orderDto.setOrderDetails(new OrderDetailsDto());
-		if (null == orderDto.getOrderprice() || orderDto.getOrderprice() == BigDecimal.ZERO)
+		if (null == orderDto.getOrderprice() || orderDto.getOrderprice() == BigDecimal.ZERO) {
+			logger.info("createOrderBook() Method  :: No order Price is provided in order creation hence marking order as MARKET ORDER");
 			orderDto.getOrderDetails().setOrderType(OrderType.MARKET_ORDER);
-		else
+		} else {
+			logger.info("createOrderBook() Method  :: Order Price is provided in order creation hence marking order as LIMIT_ORDER");
 			orderDto.getOrderDetails().setOrderType(OrderType.LIMIT_ORDER);
+		}
 		orderDto.setOrderBook(orderBookDto);
 		orderDto.getOrderDetails().setOrderStatus(OrderStatus.VALID);
 		orderDto.setCreatedOn(LocalDateTime.now());
@@ -129,6 +146,9 @@ public class OrderBookServiceImpl implements OrderBookService {
 		return modelMapper.map(order, OrderDto.class);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.cswm.assignment.service.OrderBookService#closeOrderBook(java.lang.Long)
+	 */
 	@Override
 	public synchronized OrderBookDto closeOrderBook(Long orderBookId) {
 		logger.info("closeOrderBook() Method called with argument :: (" + orderBookId + ");");
@@ -141,10 +161,12 @@ public class OrderBookServiceImpl implements OrderBookService {
 		return new ModelMapper().map(orderBook, OrderBookDto.class);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.cswm.assignment.service.OrderBookService#addExecutionToBook(java.lang.Long, com.cswm.assignment.model.dto.ExecutionDto)
+	 */
 	@Override
 	public synchronized OrderBookDto addExecutionToBook(Long orderBookId, ExecutionDto executionDto) {
-		logger.info(
-				"addExecutionToBook() Method called with argument :: (" + orderBookId + executionDto.toString() + ");");
+		logger.info("addExecutionToBook() Method called with argument :: (" + orderBookId + executionDto.toString() + ");");
 		if (null == executionDto.getQuantity() || executionDto.getQuantity() == 0l)
 			throw new ApplicationException(ErrorMessageEnum.EXECUTION_QTY_INVALID);
 		if (null == executionDto.getPrice() || executionDto.getPrice() == BigDecimal.ZERO)
@@ -161,49 +183,54 @@ public class OrderBookServiceImpl implements OrderBookService {
 			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_STATUS_OPEN);
 		if (OrderBookStatus.EXECUTED.equals(orderBookDto.getOrderBookStatus()))
 			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_STATUS_EXECUTED);
-		if (!CollectionUtils.isEmpty(orderBookDto.getExecutions())
-				&& !(executionDto.getPrice().compareTo(orderBookDto.getExecutions().iterator().next().getPrice()) == 0))
+		if (!CollectionUtils.isEmpty(orderBookDto.getExecutions()) && !(executionDto.getPrice().compareTo(orderBookDto.getExecutions().iterator().next().getPrice()) == 0))
 			throw new ApplicationException(ErrorMessageEnum.EXECUTION_PRICE_INVALID);
 		executionDto.setOrderBook(orderBookDto);
 		Set<OrderDto> validOrderdDtos = new HashSet<OrderDto>();
-		if (CollectionUtils.isEmpty(orderBookDto.getExecutions()))
+		if (CollectionUtils.isEmpty(orderBookDto.getExecutions())) {
+			logger.info("addExecutionToBook() Method :: Adding the first execution to the OrderBook So Marking the orders as Valid/Invalid");
 			validOrderdDtos = getValidOrders(orderBookDto.getOrders(), executionDto.getPrice());
-		else
-			validOrderdDtos = orderBookDto.getOrders().stream()
-					.filter(orderDto -> orderDto.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID))
-					.collect(Collectors.toSet());
+		} else {
+			validOrderdDtos = orderBookDto.getOrders().stream().filter(orderDto -> orderDto.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID)).collect(Collectors.toSet());
+			logger.info("addExecutionToBook() Method :: valid Orders in the Order Book are : ");
+			validOrderdDtos.forEach(orderDto -> logger.info("addExecutionToBook() Method :: " + orderDto.toString()));
+		}
 
 		Long totalDemand = 0l;
 		Long totalExecutions = 0l;
 		for (OrderDto orderDto : validOrderdDtos) {
 			totalDemand = totalDemand + orderDto.getOrderQuantity();
-			totalExecutions += (null == orderDto.getOrderDetails().getExecutionQuantity() ? 0
-					: orderDto.getOrderDetails().getExecutionQuantity());
+			totalExecutions += (null == orderDto.getOrderDetails().getExecutionQuantity() ? 0 : orderDto.getOrderDetails().getExecutionQuantity());
 		}
+		logger.info("addExecutionToBook() Method :: validDemands in the order Book = " + totalDemand);
+		logger.info("addExecutionToBook() Method :: totalExecutions in the order Book = " + totalExecutions);
 		if (totalDemand <= totalExecutions.doubleValue()) {
+			logger.info("addExecutionToBook() Method :: validDemands is less than total execution marking the order book as executed");
 			orderBookDto.setOrderBookStatus(OrderBookStatus.EXECUTED);
 			orderBookRepository.updateOrderBookStatus(orderBookId, OrderBookStatus.EXECUTED);
-
 			return orderBookDto;
 		}
-		Long effectiveQtyForCurrentExec = ((totalExecutions + executionDto.getQuantity()) > totalDemand)
-				? (long) (totalDemand - totalExecutions)
-				: executionDto.getQuantity();
+
+		Long effectiveQtyForCurrentExec = ((totalExecutions + executionDto.getQuantity()) > totalDemand) ? (long) (totalDemand - totalExecutions) : executionDto.getQuantity();
+		logger.info("addExecutionToBook() Method :: effective Quantity for the execution = " + effectiveQtyForCurrentExec);
 		orderService.addExecutionQuantityToOrders(validOrderdDtos, totalDemand, effectiveQtyForCurrentExec);
 		Execution execution = new ModelMapper().map(executionDto, Execution.class);
+		logger.info("addExecutionToBook() Method :: Final Execution getting saved as " + execution);
 		executionRepository.save(execution);
-		boolean isDeltaExecution = effectiveQtyForCurrentExec != executionDto.getQuantity();
-		if (isDeltaExecution) {
+		if (effectiveQtyForCurrentExec != executionDto.getQuantity()) {
+			logger.info("addExecutionToBook() Method :: execution executed partially as the effectice quantity for execution = " + effectiveQtyForCurrentExec + " and original execution quantity = "
+					+ execution.getQuantity());
 			executionDto.setQuantity(effectiveQtyForCurrentExec);
 			orderBookDto.setOrderBookStatus(OrderBookStatus.EXECUTED);
-			orderBookDto = getOrderBook(orderBookId);
-			return orderBookDto;
 		}
 		orderBookDto = getOrderBook(orderBookId);
 		logger.info("addExecutionToBook() Method returned value  :: " + orderBookDto.toString());
 		return orderBookDto;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.cswm.assignment.service.OrderBookService#getOrderBookStats(java.lang.Long)
+	 */
 	@Override
 	public synchronized OrderBookStatisticsDto getOrderBookStats(Long orderBookId) {
 		logger.info("getOrderBookStats() Method called with argument :: (" + orderBookId + ");");
@@ -222,8 +249,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 		LocalDateTime Laetst = LocalDateTime.MIN;
 		for (OrderDto orderDto : bookOrders) {
 			totalOrderDemand = totalOrderDemand + orderDto.getOrderQuantity();
-			if (orderDto.getOrderDetails().getOrderType().equals(OrderType.LIMIT_ORDER)
-					&& limitPriceVsDemandTable.containsKey(orderDto.getOrderprice())) {
+			if (orderDto.getOrderDetails().getOrderType().equals(OrderType.LIMIT_ORDER) && limitPriceVsDemandTable.containsKey(orderDto.getOrderprice())) {
 				Long newDemand = limitPriceVsDemandTable.get(orderDto.getOrderprice()) + orderDto.getOrderQuantity();
 				limitPriceVsDemandTable.put(orderDto.getOrderprice(), newDemand);
 			} else if (orderDto.getOrderDetails().getOrderType().equals(OrderType.LIMIT_ORDER)) {
@@ -253,14 +279,19 @@ public class OrderBookServiceImpl implements OrderBookService {
 		return orderBookStatsVo;
 	}
 
+	/**
+	 * Used to mark the order list under the specific order book as valid or invalid
+	 * @param bookOrderDtos
+	 * @param executionPrice
+	 * @return set of valid orders 
+	 */
 	private Set<OrderDto> getValidOrders(Set<OrderDto> bookOrderDtos, BigDecimal executionPrice) {
 		logger.info("getValidOrders() Method called with argument :: (" + bookOrderDtos + "," + executionPrice + ");");
 		Set<OrderDto> validOrderDtos = new HashSet<>();
 		for (OrderDto orderDto : bookOrderDtos) {
 			if (orderDto.getOrderDetails().getOrderType().equals(OrderType.MARKET_ORDER))
 				validOrderDtos.add(orderDto);
-			else if ((executionPrice
-					.compareTo(null == orderDto.getOrderprice() ? BigDecimal.ZERO : orderDto.getOrderprice()) == -1
+			else if ((executionPrice.compareTo(null == orderDto.getOrderprice() ? BigDecimal.ZERO : orderDto.getOrderprice()) == -1
 					&& orderDto.getOrderDetails().getOrderType() == OrderType.LIMIT_ORDER))
 				validOrderDtos.add(orderDto);
 			else {
@@ -273,19 +304,18 @@ public class OrderBookServiceImpl implements OrderBookService {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see com.cswm.assignment.service.OrderBookService#getOrderBookValidInvalidOrdersStats(java.lang.Long)
+	 */
 	@Override
 	public OrderBookValidInValidStatistics getOrderBookValidInvalidOrdersStats(Long orderBookId) {
 		logger.info("getValidOrders() Method called with argument :: (" + orderBookId + ");");
-		OrderBookValidInValidStatistics bookValidInValidStatistics = new OrderBookValidInValidStatistics(
-				getOrderBookStats(orderBookId));
+		OrderBookValidInValidStatistics bookValidInValidStatistics = new OrderBookValidInValidStatistics(getOrderBookStats(orderBookId));
 
 		OrderBookDto orderBookDto = getOrderBook(orderBookId);
 		Set<OrderDto> bookOrders = orderBookDto.getOrders();
-		BigDecimal executionPrice = (CollectionUtils.isEmpty(orderBookDto.getExecutions()) ? BigDecimal.ZERO
-				: orderBookDto.getExecutions().iterator().next().getPrice());
-		Set<OrderDto> validOrderDtos = bookOrders.stream()
-				.filter(orderDto -> orderDto.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID))
-				.collect(Collectors.toSet());
+		BigDecimal executionPrice = (CollectionUtils.isEmpty(orderBookDto.getExecutions()) ? BigDecimal.ZERO : orderBookDto.getExecutions().iterator().next().getPrice());
+		Set<OrderDto> validOrderDtos = bookOrders.stream().filter(orderDto -> orderDto.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID)).collect(Collectors.toSet());
 
 		bookValidInValidStatistics.setValidOrderCount((long) validOrderDtos.size());
 		bookValidInValidStatistics.setInValidOrderCount((long) (bookOrders.size() - validOrderDtos.size()));
@@ -299,11 +329,9 @@ public class OrderBookServiceImpl implements OrderBookService {
 		bookValidInValidStatistics.setValidDemand(validDemand);
 		bookValidInValidStatistics.setExecutionQty(totalExecutionQuqntity);
 
-		bookValidInValidStatistics.setInValidDemand(
-				bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoofAccuOrders() - validDemand);
+		bookValidInValidStatistics.setInValidDemand(bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoofAccuOrders() - validDemand);
 		bookValidInValidStatistics.setTotalExecutionPrice(executionPrice.multiply(executionPrice));
-		logger.info(
-				"getOrderBookValidInvalidOrdersStats() Method returned value :: (" + bookValidInValidStatistics + ");");
+		logger.info("getOrderBookValidInvalidOrdersStats() Method returned value :: (" + bookValidInValidStatistics + ");");
 		return bookValidInValidStatistics;
 	}
 
