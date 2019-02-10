@@ -30,19 +30,23 @@ public class OrderBookController {
 	@Autowired
 	OrderService orderService;
 
-	/*
+	/**
 	 * Used to get statistics of the order book
 	 * URI : /orderbooks/{orderBookId}/stastitics
+	 * @param orderBookId
+	 * @return
 	 */
 	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_STATISTICS, method = RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
 	public @ResponseBody OrderBookStatisticsDto getOrderBookStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookStats(orderBookId);
 	}
-	
-	/*
-	 * Used to get valid invalid statistics of the order book 
-	 * URI : /orderbooks/{orderBookId}/validInvalidstastitics
+
+	/**
+	 * Used to get valid invalid statistics of the order book
+	 * URI :/orderbooks/{orderBookId}/validInvalidstastitics
+	 * @param orderBookId
+	 * @return
 	 */
 	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_VALID_INVALID_STATISTICS, method = RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -50,9 +54,12 @@ public class OrderBookController {
 		return orderBookService.getOrderBookValidInvalidOrdersStats(orderBookId);
 	}
 
-	/*
-	 * Used to get statistics of the order in a order book
-	 * URI : /orderbooks/{orderBookId}/orderStatistics/{orderId}
+	/**
+	 * Used to get statistics of the order in a order book 
+	 * URI :/orderbooks/{orderBookId}/orderStatistics/{orderId}
+	 * @param orderBookId
+	 * @param orderId
+	 * @return
 	 */
 	@RequestMapping(value = UrlConstants.URL_GET_ORDER_STATISTICS, method = RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -60,9 +67,11 @@ public class OrderBookController {
 		return orderService.getOrderStats(orderId);
 	}
 
-	/*
-	 * Used to Create a new order book
+	/**
+	 * Used to Create a new order book 
 	 * URI : /orderbooks/create
+	 * @param orderBookDto
+	 * @return
 	 */
 	@RequestMapping(value = UrlConstants.URL_CREATE_ORDER_BOOK, method = RequestMethod.POST)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -71,9 +80,12 @@ public class OrderBookController {
 		return orderBookService.createOrderBook(orderBookDto);
 	}
 
-	/*
-	 * Used to add an order in a orderbook
+	/**
+	 * Used to add an order in a orderbook 
 	 * URI : /orderbooks/{orderBookId}/orders
+	 * @param orderDto
+	 * @param orderBookId
+	 * @return
 	 */
 	@RequestMapping(value = UrlConstants.URL_ADD_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -82,9 +94,11 @@ public class OrderBookController {
 		return orderBookService.addOrderToOrderBook(orderBookId, orderDto);
 	}
 
-	/*
-	 * Used to Close a orderbook
+	/**
+	 * Used to Close a orderbook 
 	 * URI : /orderbooks/{orderBookId}/close
+	 * @param orderBookId
+	 * @return
 	 */
 	@RequestMapping(value = UrlConstants.URL_CLOSE_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -92,18 +106,21 @@ public class OrderBookController {
 	public @ResponseBody OrderBookDto closeOrderBook(@PathVariable Long orderBookId) {
 		return orderBookService.closeOrderBook(orderBookId);
 	}
-	/*
-	 * Used to execute Order book
+
+	/**
+	 * Used to execute Order book 
 	 * URI : /orderbooks/{orderBookId}/execute
+	 * @param orderBookId
+	 * @param executionDto
+	 * @return
 	 */
 	@RequestMapping(value = UrlConstants.URL_EXECUTE_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDto addExecutionToBook(@PathVariable Long orderBookId,
-			@RequestBody ExecutionDto executionDto) {
-		 OrderBookDto orderBookDto = orderBookService.addExecutionToBook(orderBookId, executionDto);
-		 return orderBookDto;
-			 
+	public @ResponseBody OrderBookDto addExecutionToBook(@PathVariable Long orderBookId, @RequestBody ExecutionDto executionDto) {
+		OrderBookDto orderBookDto = orderBookService.addExecutionToBook(orderBookId, executionDto);
+		return orderBookDto;
+
 	}
 
 }
