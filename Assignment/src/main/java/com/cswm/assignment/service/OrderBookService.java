@@ -2,13 +2,13 @@ package com.cswm.assignment.service;
 
 import org.springframework.stereotype.Service;
 
-import com.cswm.assignment.model.dto.OrderBookDto;
-import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
-import com.cswm.assignment.model.dto.OrderBookValidInValidStatistics;
-import com.cswm.assignment.model.dto.OrderDto;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookValidInValidStatisticsOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 
 @Service
 public interface OrderBookService {
@@ -19,7 +19,7 @@ public interface OrderBookService {
 	 * @param orderBookCreateInputDto
 	 * @return updated order book object after creating
 	 */
-	OrderBookDto createOrderBook(OrderBookInputDto orderBookCreateInputDto);
+	OrderBookOutputDto createOrderBook(OrderBookInputDto orderBookCreateInputDto);
 
 	/**
 	 * Used to add order to specified order book
@@ -27,14 +27,14 @@ public interface OrderBookService {
 	 * @param orderDto
 	 * @return updated order book with order book details after adding to order book
 	 */
-	OrderDto addOrderToOrderBook(Long orderBookId, AddOrderInputDto addOrderInputDto);
+	OrderOutputDto addOrderToOrderBook(Long orderBookId, AddOrderInputDto addOrderInputDto);
 
 	/**
 	 * Used to close the orderbook
 	 * @param orderBookId
 	 * @return updated order book object after closing
 	 */
-	OrderBookDto closeOrderBook(Long orderBookId);
+	OrderBookOutputDto closeOrderBook(Long orderBookId);
 
 	/**
 	 * add execution to the order.
@@ -42,7 +42,7 @@ public interface OrderBookService {
 	 * @param executionInputDto
 	 * @return updated order book after adding an execution.
 	 */
-	OrderBookDto addExecutionToBook(Long orderBookId, ExecutionInputDto executionInputDto);
+	OrderBookOutputDto addExecutionToBook(Long orderBookId, ExecutionInputDto executionInputDto);
 
 	
 	/**
@@ -53,7 +53,7 @@ public interface OrderBookService {
 	 * @param orderBookId
 	 * @return OrderBookStatisticsDto object containing order book statistics
 	 */
-	OrderBookStatisticsDto getOrderBookStats(Long orderBookId);
+	OrderBookStatisticsOutputDto getOrderBookStats(Long orderBookId);
 
 	/**
 	 * Used to get the detailed order book statistics at valid and invalid order level.
@@ -66,7 +66,7 @@ public interface OrderBookService {
 	 * @param orderBookId
 	 * @return OrderBookValidInValidStatistics object containing order book statistics at valid and invalid order level
 	 */
-	OrderBookValidInValidStatistics getOrderBookValidInvalidOrdersStats(Long orderBookId);
+	OrderBookValidInValidStatisticsOutputDto getOrderBookValidInvalidOrdersStats(Long orderBookId);
 
 
 }

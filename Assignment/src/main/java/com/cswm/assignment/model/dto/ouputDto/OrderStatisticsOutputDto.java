@@ -1,4 +1,4 @@
-package com.cswm.assignment.model.dto;
+package com.cswm.assignment.model.dto.ouputDto;
 
 import java.math.BigDecimal;
 
@@ -10,11 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class OrderStatisticsDto {
+public class OrderStatisticsOutputDto {
 
 	private OrderDto order;
 	private BigDecimal executionPrice;

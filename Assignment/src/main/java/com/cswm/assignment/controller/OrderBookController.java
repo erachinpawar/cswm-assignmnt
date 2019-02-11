@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cswm.assignment.UrlConstants;
-import com.cswm.assignment.model.dto.OrderBookDto;
-import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
-import com.cswm.assignment.model.dto.OrderBookValidInValidStatistics;
-import com.cswm.assignment.model.dto.OrderDto;
-import com.cswm.assignment.model.dto.OrderStatisticsDto;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookValidInValidStatisticsOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderStatisticsOutputDto;
 import com.cswm.assignment.service.OrderBookService;
 import com.cswm.assignment.service.OrderService;
 
@@ -43,8 +43,8 @@ public class OrderBookController {
 	 */
 	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_STATISTICS, method = RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Get order book statistics for a order book id", response = OrderBookStatisticsDto.class)
-	public @ResponseBody OrderBookStatisticsDto getOrderBookStats(@PathVariable Long orderBookId) {
+	@ApiOperation(value = "Get order book statistics for a order book id", response = OrderBookStatisticsOutputDto.class)
+	public @ResponseBody OrderBookStatisticsOutputDto getOrderBookStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookStats(orderBookId);
 	}
 
@@ -55,10 +55,10 @@ public class OrderBookController {
 	 * @param orderBookId
 	 * @return
 	 */
-	@ApiOperation(value = "Get order book detailed statistics at valid and invalid order level for a order book id", response = OrderBookValidInValidStatistics.class)
+	@ApiOperation(value = "Get order book detailed statistics at valid and invalid order level for a order book id", response = OrderBookValidInValidStatisticsOutputDto.class)
 	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_VALID_INVALID_STATISTICS, method = RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookValidInValidStatistics getOrderBookValidInvalidOrdersStats(@PathVariable Long orderBookId) {
+	public @ResponseBody OrderBookValidInValidStatisticsOutputDto getOrderBookValidInvalidOrdersStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookValidInvalidOrdersStats(orderBookId);
 	}
 
@@ -70,10 +70,10 @@ public class OrderBookController {
 	 * @param orderId
 	 * @return
 	 */
-	@ApiOperation(value = "Get order statistics for a order id ", response = OrderStatisticsDto.class)
+	@ApiOperation(value = "Get order statistics for a order id ", response = OrderStatisticsOutputDto.class)
 	@RequestMapping(value = UrlConstants.URL_GET_ORDER_STATISTICS, method = RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderStatisticsDto getOrderStats(@PathVariable Long orderBookId, @PathVariable Long orderId) {
+	public @ResponseBody OrderStatisticsOutputDto getOrderStats(@PathVariable Long orderBookId, @PathVariable Long orderId) {
 		return orderService.getOrderStats(orderId);
 	}
 
@@ -83,11 +83,11 @@ public class OrderBookController {
 	 * @param orderBookDto
 	 * @return
 	 */
-	@ApiOperation(value = "Create order book ", response = OrderBookDto.class)
+	@ApiOperation(value = "Create order book ", response = OrderBookOutputDto.class)
 	@RequestMapping(value = UrlConstants.URL_CREATE_ORDER_BOOK, method = RequestMethod.POST)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDto createOrderBook(@RequestBody OrderBookInputDto orderBookCreateInputDto) {
+	public @ResponseBody OrderBookOutputDto createOrderBook(@RequestBody OrderBookInputDto orderBookCreateInputDto) {
 		return orderBookService.createOrderBook(orderBookCreateInputDto);
 	}
 
@@ -98,11 +98,11 @@ public class OrderBookController {
 	 * @param orderBookId
 	 * @return
 	 */
-	@ApiOperation(value = "add order to order book ", response = OrderDto.class)
+	@ApiOperation(value = "add order to order book ", response = OrderOutputDto.class)
 	@RequestMapping(value = UrlConstants.URL_ADD_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderDto addOrderToOrderBook(@RequestBody AddOrderInputDto addOrderInputDto, @PathVariable Long orderBookId) {
+	public @ResponseBody OrderOutputDto addOrderToOrderBook(@RequestBody AddOrderInputDto addOrderInputDto, @PathVariable Long orderBookId) {
 		return orderBookService.addOrderToOrderBook(orderBookId, addOrderInputDto);
 	}
 
@@ -112,11 +112,11 @@ public class OrderBookController {
 	 * @param orderBookId
 	 * @return
 	 */
-	@ApiOperation(value = "Close order book so that addition of more orders is not allowed and executions can be added", response = OrderBookDto.class)
+	@ApiOperation(value = "Close order book so that addition of more orders is not allowed and executions can be added", response = OrderBookOutputDto.class)
 	@RequestMapping(value = UrlConstants.URL_CLOSE_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDto closeOrderBook(@PathVariable Long orderBookId) {
+	public @ResponseBody OrderBookOutputDto closeOrderBook(@PathVariable Long orderBookId) {
 		return orderBookService.closeOrderBook(orderBookId);
 	}
 
@@ -127,13 +127,12 @@ public class OrderBookController {
 	 * @param executionDto
 	 * @return
 	 */
-	@ApiOperation(value = "Used to add executions to order book", response = OrderBookDto.class)
+	@ApiOperation(value = "Used to add executions to order book", response = OrderBookOutputDto.class)
 	@RequestMapping(value = UrlConstants.URL_EXECUTE_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDto addExecutionToBook(@PathVariable Long orderBookId, @RequestBody ExecutionInputDto executionInputDto ) {
-		OrderBookDto orderBookDto = orderBookService.addExecutionToBook(orderBookId, executionInputDto);
-		return orderBookDto;
+	public @ResponseBody OrderBookOutputDto addExecutionToBook(@PathVariable Long orderBookId, @RequestBody ExecutionInputDto executionInputDto) {
+		return orderBookService.addExecutionToBook(orderBookId, executionInputDto);
 
 	}
 

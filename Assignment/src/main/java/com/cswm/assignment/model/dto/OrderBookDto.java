@@ -78,14 +78,4 @@ public class OrderBookDto {
 		this.createdOn = createdOn;
 	}
 
-	@Override
-	public String toString() {
-		return "OrderBookDto [orderBookId=" + orderBookId + ", instrument=" + instrument + ", orderBookStatus="
-				+ orderBookStatus + ", executions=" + executions + ", orders=" + orders + ", createdBy=" + createdBy
-				+ ", createdOn=" + createdOn + "]";
-	}
-
-	
-	
-
 }

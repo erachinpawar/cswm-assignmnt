@@ -1,8 +1,8 @@
-package com.cswm.assignment.model.dto;
+package com.cswm.assignment.model.dto.ouputDto;
 
 import java.math.BigDecimal;
 
-public class OrderBookValidInValidStatistics {
+public class OrderBookValidInValidStatisticsOutputDto {
 
 	private Long validOrderCount;
 	private Long inValidOrderCount;
@@ -10,11 +10,11 @@ public class OrderBookValidInValidStatistics {
 	private Long inValidDemand;
 	private Long executionQty;
 	private BigDecimal totalExecutionPrice;
-	private OrderBookStatisticsDto orderBookStatisticsDto;
+	private OrderBookStatisticsOutputDto orderBookStatisticsDto;
 	
-	public OrderBookValidInValidStatistics() {	}	
+	public OrderBookValidInValidStatisticsOutputDto() {	}	
 
-	public OrderBookValidInValidStatistics(OrderBookStatisticsDto orderBookStats) {
+	public OrderBookValidInValidStatisticsOutputDto(OrderBookStatisticsOutputDto orderBookStats) {
 		this.orderBookStatisticsDto = orderBookStats;
 	}
 
@@ -66,11 +66,11 @@ public class OrderBookValidInValidStatistics {
 		this.totalExecutionPrice = totalExecutionPrice;
 	}
 
-	public OrderBookStatisticsDto getOrderBookStatisticsDto() {
+	public OrderBookStatisticsOutputDto getOrderBookStatisticsDto() {
 		return orderBookStatisticsDto;
 	}
 
-	public void setOrderBookStatisticsDto(OrderBookStatisticsDto orderBookStatisticsDto) {
+	public void setOrderBookStatisticsDto(OrderBookStatisticsOutputDto orderBookStatisticsDto) {
 		this.orderBookStatisticsDto = orderBookStatisticsDto;
 	}
 

@@ -6,7 +6,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.cswm.assignment.model.Order;
-import com.cswm.assignment.model.dto.OrderStatisticsDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderStatisticsOutputDto;
 
 @Service
 public interface OrderService {
@@ -17,7 +17,7 @@ public interface OrderService {
 	 * @param orderId
 	 * @return OrderStatisticsDto
 	 */
-	OrderStatisticsDto getOrderStats(Long orderId);
+	OrderStatisticsOutputDto getOrderStats(Long orderId);
 
 	/**
 	 * distribution of execution quantity among valid orders linearly

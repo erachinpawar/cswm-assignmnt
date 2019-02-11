@@ -1,4 +1,4 @@
-package com.cswm.assignment.model.dto;
+package com.cswm.assignment.model.dto.ouputDto;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderBookStatisticsDto {
+public class OrderBookStatisticsOutputDto {
 
 	private Long totalNoOfOrders;
 	private Long totalNoofAccuOrders;
-	private Map<OrderTypesInStatistics, OrderDto> orderTypesInStats;
+	private Map<OrderTypesInStatistics, OrderOutputDto> orderTypesInStats;
 	Map<BigDecimal, Long> limitPriceVsDemandTable;
 
 	public Long getTotalNoOfOrders() {
@@ -37,11 +37,11 @@ public class OrderBookStatisticsDto {
 		this.totalNoofAccuOrders = totalNoofAccuOrders;
 	}
 
-	public Map<OrderTypesInStatistics, OrderDto> getOrderTypesInStats() {
+	public Map<OrderTypesInStatistics, OrderOutputDto> getOrderTypesInStats() {
 		return orderTypesInStats;
 	}
 
-	public void setOrderTypesInStats(Map<OrderTypesInStatistics, OrderDto> orderTypesInStats) {
+	public void setOrderTypesInStats(Map<OrderTypesInStatistics, OrderOutputDto> orderTypesInStats) {
 		this.orderTypesInStats = orderTypesInStats;
 	}
 

@@ -1,11 +1,10 @@
-package com.cswm.assignment.model.dto;
+package com.cswm.assignment.model.dto.ouputDto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-public class ExecutionDto {
+public class ExecutionOutputDto {
 
 	private Long executionId;
 
@@ -14,13 +13,9 @@ public class ExecutionDto {
 	private Long quantity;
 
 	@JsonBackReference
-	private OrderBookDto orderBook;
+	private OrderBookOutputDto orderBook;
 
-	private String createdBy;
-
-	private LocalDateTime createdOn;
-
-	public ExecutionDto() {
+	public ExecutionOutputDto() {
 	}
 
 	public Long getExecutionId() {
@@ -47,28 +42,12 @@ public class ExecutionDto {
 		this.quantity = quantity;
 	}
 
-	public OrderBookDto getOrderBook() {
+	public OrderBookOutputDto getOrderBook() {
 		return orderBook;
 	}
 
-	public void setOrderBook(OrderBookDto orderBook) {
+	public void setOrderBook(OrderBookOutputDto orderBook) {
 		this.orderBook = orderBook;
-	}
-
-	public String getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedOn() {
-		return createdOn;
-	}
-
-	public void setCreatedOn(LocalDateTime createdOn) {
-		this.createdOn = createdOn;
 	}
 
 
