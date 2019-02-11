@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.cswm.assignment.UrlConstants;
-import com.cswm.assignment.model.dto.ExecutionDto;
 import com.cswm.assignment.model.dto.OrderBookDto;
 import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
 import com.cswm.assignment.model.dto.OrderBookValidInValidStatistics;
 import com.cswm.assignment.model.dto.OrderDto;
 import com.cswm.assignment.model.dto.OrderStatisticsDto;
+import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
+import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
+import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.service.OrderBookService;
 import com.cswm.assignment.service.OrderService;
 
@@ -85,8 +87,8 @@ public class OrderBookController {
 	@RequestMapping(value = UrlConstants.URL_CREATE_ORDER_BOOK, method = RequestMethod.POST)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDto createOrderBook(@RequestBody OrderBookDto orderBookDto) {
-		return orderBookService.createOrderBook(orderBookDto);
+	public @ResponseBody OrderBookDto createOrderBook(@RequestBody OrderBookInputDto orderBookCreateInputDto) {
+		return orderBookService.createOrderBook(orderBookCreateInputDto);
 	}
 
 	/**
@@ -100,8 +102,8 @@ public class OrderBookController {
 	@RequestMapping(value = UrlConstants.URL_ADD_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderDto addOrderToOrderBook(@RequestBody OrderDto orderDto, @PathVariable Long orderBookId) {
-		return orderBookService.addOrderToOrderBook(orderBookId, orderDto);
+	public @ResponseBody OrderDto addOrderToOrderBook(@RequestBody AddOrderInputDto addOrderInputDto, @PathVariable Long orderBookId) {
+		return orderBookService.addOrderToOrderBook(orderBookId, addOrderInputDto);
 	}
 
 	/**
@@ -129,8 +131,8 @@ public class OrderBookController {
 	@RequestMapping(value = UrlConstants.URL_EXECUTE_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDto addExecutionToBook(@PathVariable Long orderBookId, @RequestBody ExecutionDto executionDto) {
-		OrderBookDto orderBookDto = orderBookService.addExecutionToBook(orderBookId, executionDto);
+	public @ResponseBody OrderBookDto addExecutionToBook(@PathVariable Long orderBookId, @RequestBody ExecutionInputDto executionInputDto ) {
+		OrderBookDto orderBookDto = orderBookService.addExecutionToBook(orderBookId, executionInputDto);
 		return orderBookDto;
 
 	}

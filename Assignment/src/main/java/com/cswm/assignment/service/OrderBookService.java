@@ -2,11 +2,13 @@ package com.cswm.assignment.service;
 
 import org.springframework.stereotype.Service;
 
-import com.cswm.assignment.model.dto.ExecutionDto;
 import com.cswm.assignment.model.dto.OrderBookDto;
 import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
 import com.cswm.assignment.model.dto.OrderBookValidInValidStatistics;
 import com.cswm.assignment.model.dto.OrderDto;
+import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
+import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
+import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 
 @Service
 public interface OrderBookService {
@@ -14,10 +16,10 @@ public interface OrderBookService {
 
 	/**
 	 * Used to create the order book
-	 * @param orderBookDto
+	 * @param orderBookCreateInputDto
 	 * @return updated order book object after creating
 	 */
-	OrderBookDto createOrderBook(OrderBookDto orderBookDto);
+	OrderBookDto createOrderBook(OrderBookInputDto orderBookCreateInputDto);
 
 	/**
 	 * Used to add order to specified order book
@@ -25,7 +27,7 @@ public interface OrderBookService {
 	 * @param orderDto
 	 * @return updated order book with order book details after adding to order book
 	 */
-	OrderDto addOrderToOrderBook(Long orderBookId, OrderDto orderDto);
+	OrderDto addOrderToOrderBook(Long orderBookId, AddOrderInputDto addOrderInputDto);
 
 	/**
 	 * Used to close the orderbook
@@ -37,10 +39,10 @@ public interface OrderBookService {
 	/**
 	 * add execution to the order.
 	 * @param orderBookId
-	 * @param executionDto
+	 * @param executionInputDto
 	 * @return updated order book after adding an execution.
 	 */
-	OrderBookDto addExecutionToBook(Long orderBookId, ExecutionDto executionDto);
+	OrderBookDto addExecutionToBook(Long orderBookId, ExecutionInputDto executionInputDto);
 
 	
 	/**

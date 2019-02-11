@@ -19,13 +19,14 @@ import com.cswm.assignment.applicationutils.OrderStatus;
 import com.cswm.assignment.applicationutils.OrderType;
 import com.cswm.assignment.applicationutils.OrderTypesInStatistics;
 import com.cswm.assignment.model.Message;
-import com.cswm.assignment.model.dto.ExecutionDto;
-import com.cswm.assignment.model.dto.InstrumentDto;
 import com.cswm.assignment.model.dto.OrderBookDto;
 import com.cswm.assignment.model.dto.OrderBookStatisticsDto;
 import com.cswm.assignment.model.dto.OrderBookValidInValidStatistics;
 import com.cswm.assignment.model.dto.OrderDto;
 import com.cswm.assignment.model.dto.OrderStatisticsDto;
+import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
+import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
+import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 
 @FixMethodOrder(MethodSorters.JVM)
 public class orderBookTest extends AbstractTest {
@@ -34,14 +35,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void newOrderBookTest() throws Exception {
 		String uri = "/orderbooks/create";
-		OrderBookDto orderBookDto = new OrderBookDto();
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentId(1l);
-		orderBookDto.setInstrument(instrumentDto);
-		String inputJson = super.mapToJson(orderBookDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		OrderBookInputDto bookInputDto = new OrderBookInputDto();
+		bookInputDto.setInstrumentId(1l);
+
+		String inputJson = super.mapToJson(bookInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
@@ -54,12 +52,9 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void newOrderBookNoInstrumentTest() throws Exception {
 		String uri = "/orderbooks/create";
-		OrderBookDto orderBookDto = new OrderBookDto();
-		orderBookDto.setOrderBookId(2001l);
-		String inputJson = super.mapToJson(orderBookDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		OrderBookInputDto bookInputDto = new OrderBookInputDto();
+		String inputJson = super.mapToJson(bookInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -70,17 +65,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void newOrderBooWithOtherOpenBook() throws Exception {
 		String uri = "/orderbooks/create";
-		OrderBookDto orderBookDto = new OrderBookDto();
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentId(1l);
-		orderBookDto.setInstrument(instrumentDto);
-		String inputJson = super.mapToJson(orderBookDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
-		mvcResult = mvc
-				.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		OrderBookInputDto bookInputDto = new OrderBookInputDto();
+		bookInputDto.setInstrumentId(1l);
+		String inputJson = super.mapToJson(bookInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
+		mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -93,17 +82,12 @@ public class orderBookTest extends AbstractTest {
 	public void addLimitOrderToOrderBook() throws Exception {
 		/// add order to order book
 		String uri = "/orderbooks/1001/orders";
-		OrderDto orderDto = new OrderDto();
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentId(2l);
-		orderDto.setInstrument(instrumentDto);
-		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
-		orderDto.setOrderQuantity(100l);
-		String inputJson = super.mapToJson(orderDto);
-		inputJson = super.mapToJson(orderDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		AddOrderInputDto addOrderInputDto = new AddOrderInputDto();
+		addOrderInputDto.setInstrumentId(2l);
+		addOrderInputDto.setOrderprice(BigDecimal.valueOf(2000l));
+		addOrderInputDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(addOrderInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderDto addedOrderDto = mapFromJson(content, OrderDto.class);
@@ -118,16 +102,11 @@ public class orderBookTest extends AbstractTest {
 	public void addMarketOrderToOrderBook() throws Exception {
 		/// add order to order book
 		String uri = "/orderbooks/1001/orders";
-		OrderDto orderDto = new OrderDto();
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentId(2l);
-		orderDto.setInstrument(instrumentDto);
-		orderDto.setOrderQuantity(100l);
-		String inputJson = super.mapToJson(orderDto);
-		inputJson = super.mapToJson(orderDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		AddOrderInputDto addOrderInputDto = new AddOrderInputDto();
+		addOrderInputDto.setInstrumentId(2l);
+		addOrderInputDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(addOrderInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderDto addedOrderDto = mapFromJson(content, OrderDto.class);
@@ -142,17 +121,12 @@ public class orderBookTest extends AbstractTest {
 	public void addOrderToOrderBookWithDifferntInstrument() throws Exception {
 		/// add order to order book
 		String uri = "/orderbooks/1001/orders";
-		OrderDto orderDto = new OrderDto();
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentId(3l);
-		orderDto.setInstrument(instrumentDto);
-		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
-		orderDto.setOrderQuantity(100l);
-		String inputJson = super.mapToJson(orderDto);
-		inputJson = super.mapToJson(orderDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		AddOrderInputDto addOrderInputDto = new AddOrderInputDto();
+		addOrderInputDto.setInstrumentId(3l);
+		addOrderInputDto.setOrderprice(BigDecimal.valueOf(2000l));
+		addOrderInputDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(addOrderInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -163,23 +137,15 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addOrderToOrderBookWithBookNotOpen() throws Exception {
 		/// add order to order book
-		String uri = "/orderbooks/1001/orders";
 		String closeUri = "/orderbooks/1001/close";
-		OrderDto orderDto = new OrderDto();
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentId(3l);
-		orderDto.setInstrument(instrumentDto);
-		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
-		orderDto.setOrderQuantity(100l);
-		String inputJson = super.mapToJson(orderDto);
-		inputJson = super.mapToJson(orderDto);
-		MvcResult mvcResult = mvc
-				.perform(
-						MockMvcRequestBuilders.put(closeUri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
-		mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		String uri = "/orderbooks/1001/orders";
+		AddOrderInputDto addOrderInputDto = new AddOrderInputDto();
+		addOrderInputDto.setInstrumentId(2l);
+		addOrderInputDto.setOrderprice(BigDecimal.valueOf(2000l));
+		addOrderInputDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(addOrderInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(closeUri).contentType(MediaType.APPLICATION_JSON)).andReturn();
+		mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -190,15 +156,13 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addOrderToOrderBookWithNoInstrument() throws Exception {
 		/// add order to order book
+
 		String uri = "/orderbooks/1001/orders";
-		OrderDto orderDto = new OrderDto();
-		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
-		orderDto.setOrderQuantity(100l);
-		String inputJson = super.mapToJson(orderDto);
-		inputJson = super.mapToJson(orderDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		AddOrderInputDto addOrderInputDto = new AddOrderInputDto();
+		addOrderInputDto.setOrderprice(BigDecimal.valueOf(2000l));
+		addOrderInputDto.setOrderQuantity(100l);
+		String inputJson = super.mapToJson(addOrderInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -210,16 +174,11 @@ public class orderBookTest extends AbstractTest {
 	public void addOrderToOrderBookWithNoQty() throws Exception {
 		/// add order to order book
 		String uri = "/orderbooks/1001/orders";
-		OrderDto orderDto = new OrderDto();
-		InstrumentDto instrumentDto = new InstrumentDto();
-		instrumentDto.setInstrumentId(3l);
-		orderDto.setInstrument(instrumentDto);
-		orderDto.setOrderprice(BigDecimal.valueOf(2000l));
-		String inputJson = super.mapToJson(orderDto);
-		inputJson = super.mapToJson(orderDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		AddOrderInputDto addOrderInputDto = new AddOrderInputDto();
+		addOrderInputDto.setInstrumentId(2l);
+		addOrderInputDto.setOrderprice(BigDecimal.valueOf(2000l));
+		String inputJson = super.mapToJson(addOrderInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -232,8 +191,7 @@ public class orderBookTest extends AbstractTest {
 	public void closeOrderBook() throws Exception {
 		/// add order to order book
 		String uri = "/orderbooks/1002/close";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON))
-				.andReturn();
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookDto orderBookDto = mapFromJson(content, OrderBookDto.class);
@@ -245,8 +203,7 @@ public class orderBookTest extends AbstractTest {
 	public void closeOrderBookStatusNotInOpen() throws Exception {
 		/// add order to order book
 		String uri = "/orderbooks/1002/close";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON))
-				.andReturn();
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -258,13 +215,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addExecutionToOrderBook() throws Exception {
 		String uri = "/orderbooks/1003/execution";
-		ExecutionDto executionDto = new ExecutionDto();
-		executionDto.setPrice(BigDecimal.valueOf(40l));
-		executionDto.setQuantity(50l);
-		String inputJson = super.mapToJson(executionDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		ExecutionInputDto executionInputDto = new ExecutionInputDto();
+		executionInputDto.setPrice(BigDecimal.valueOf(40l));
+		executionInputDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookDto orderBookDto = mapFromJson(content, OrderBookDto.class);
@@ -292,13 +247,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addExecutionToOrderBookInvalidQty() throws Exception {
 		String uri = "/orderbooks/1003/execution";
-		ExecutionDto executionDto = new ExecutionDto();
-		executionDto.setPrice(BigDecimal.valueOf(40l));
-		executionDto.setQuantity(0l);
-		String inputJson = super.mapToJson(executionDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		ExecutionInputDto executionInputDto = new ExecutionInputDto();
+		executionInputDto.setPrice(BigDecimal.valueOf(40l));
+		executionInputDto.setQuantity(0l);
+		String inputJson = super.mapToJson(executionInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -309,13 +262,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addExecutionToOrderBookWithDiffExecutionPrice() throws Exception {
 		String uri = "/orderbooks/1003/execution";
-		ExecutionDto executionDto = new ExecutionDto();
-		executionDto.setPrice(BigDecimal.valueOf(50l));
-		executionDto.setQuantity(50l);
-		String inputJson = super.mapToJson(executionDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		ExecutionInputDto executionInputDto = new ExecutionInputDto();
+		executionInputDto.setPrice(BigDecimal.valueOf(50l));
+		executionInputDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -326,13 +277,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addExecutionToOrderBookHasOpenStatus() throws Exception {
 		String uri = "/orderbooks/1007/execution";
-		ExecutionDto executionDto = new ExecutionDto();
-		executionDto.setPrice(BigDecimal.valueOf(40l));
-		executionDto.setQuantity(50l);
-		String inputJson = super.mapToJson(executionDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		ExecutionInputDto executionInputDto = new ExecutionInputDto();
+		executionInputDto.setPrice(BigDecimal.valueOf(40l));
+		executionInputDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -343,13 +292,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addExecutionToOrderBookZeroPrice() throws Exception {
 		String uri = "/orderbooks/1003/execution";
-		ExecutionDto executionDto = new ExecutionDto();
-		executionDto.setPrice(BigDecimal.valueOf(0l));
-		executionDto.setQuantity(50l);
-		String inputJson = super.mapToJson(executionDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		ExecutionInputDto executionInputDto = new ExecutionInputDto();
+		executionInputDto.setPrice(BigDecimal.valueOf(0l));
+		executionInputDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -360,13 +307,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addExecutionToOrderPartialExecution() throws Exception {
 		String uri = "/orderbooks/1003/execution";
-		ExecutionDto executionDto = new ExecutionDto();
-		executionDto.setPrice(BigDecimal.valueOf(40l));
-		executionDto.setQuantity(200l);
-		String inputJson = super.mapToJson(executionDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		ExecutionInputDto executionInputDto = new ExecutionInputDto();
+		executionInputDto.setPrice(BigDecimal.valueOf(40l));
+		executionInputDto.setQuantity(200l);
+		String inputJson = super.mapToJson(executionInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookDto orderBookDto = mapFromJson(content, OrderBookDto.class);
@@ -395,13 +340,11 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void addExecutionToOrderBookWithExeccutedStatus() throws Exception {
 		String uri = "/orderbooks/1008/execution";
-		ExecutionDto executionDto = new ExecutionDto();
-		executionDto.setPrice(BigDecimal.valueOf(40l));
-		executionDto.setQuantity(50l);
-		String inputJson = super.mapToJson(executionDto);
-		MvcResult mvcResult = mvc
-				.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson))
-				.andReturn();
+		ExecutionInputDto executionInputDto = new ExecutionInputDto();
+		executionInputDto.setPrice(BigDecimal.valueOf(40l));
+		executionInputDto.setQuantity(50l);
+		String inputJson = super.mapToJson(executionInputDto);
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -413,32 +356,26 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void getOrderBookStatistics() throws Exception {
 		String uri = "/orderbooks/1003/stastitics";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-				.andReturn();
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookStatisticsDto orderBookStatisticsDto = mapFromJson(content, OrderBookStatisticsDto.class);
 		assertEquals(200, status);
 		assertEquals(4l, orderBookStatisticsDto.getTotalNoOfOrders().longValue());
 		assertEquals(200l, orderBookStatisticsDto.getTotalNoofAccuOrders().longValue());
-		assertEquals(7l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.LATEST_ORDER)
-				.getOrderId().longValue());
-		assertEquals(6l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.BIGGEST_ORDER)
-				.getOrderId().longValue());
-		assertEquals(4l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.SMALLEST_ORDER)
-				.getOrderId().longValue());
+		assertEquals(7l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
+		assertEquals(6l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
+		assertEquals(4l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
 
 	}
 
 	@Test
 	public void getOrderBookValidInValidStatistics() throws Exception {
 		String uri = "/orderbooks/1003/detailedstastitics";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-				.andReturn();
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
-		OrderBookValidInValidStatistics bookValidInValidStatistics = mapFromJson(content,
-				OrderBookValidInValidStatistics.class);
+		OrderBookValidInValidStatistics bookValidInValidStatistics = mapFromJson(content, OrderBookValidInValidStatistics.class);
 		assertEquals(200, status);
 		assertEquals(4l, bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoOfOrders().longValue());
 		assertEquals(200l, bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoofAccuOrders().longValue());
@@ -448,20 +385,16 @@ public class orderBookTest extends AbstractTest {
 		assertEquals(180l, bookValidInValidStatistics.getValidDemand().longValue());
 		assertEquals(180l, bookValidInValidStatistics.getExecutionQty().longValue());
 		assertEquals(0, BigDecimal.valueOf(1600l).compareTo(bookValidInValidStatistics.getTotalExecutionPrice()));
-		assertEquals(7l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats()
-				.get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
-		assertEquals(6l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats()
-				.get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
-		assertEquals(4l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats()
-				.get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
+		assertEquals(7l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats().get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
+		assertEquals(6l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats().get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
+		assertEquals(4l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats().get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
 
 	}
 
 	@Test
 	public void getOrderBookStatsNtFoundTest() throws Exception {
 		String uri = "/orderbooks/2004/stastitics";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-				.andReturn();
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
@@ -472,8 +405,7 @@ public class orderBookTest extends AbstractTest {
 	@Test
 	public void getOrderStats() throws Exception {
 		String uri = "/orderbooks/1003/orderStatistics/5";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON))
-				.andReturn();
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderStatisticsDto orderStatisticsDto = mapFromJson(content, OrderStatisticsDto.class);
