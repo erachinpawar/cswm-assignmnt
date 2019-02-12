@@ -18,7 +18,6 @@ import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookDetailedStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderStatisticsOutputDto;
 import com.cswm.assignment.service.OrderBookService;
@@ -46,20 +45,6 @@ public class OrderBookController {
 	@ApiOperation(value = "Get order book statistics for a order book id", response = OrderBookStatisticsOutputDto.class)
 	public @ResponseBody OrderBookStatisticsOutputDto getOrderBookStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookStats(orderBookId);
-	}
-
-	/**
-	 * Used to get valid invalid statistics of the order book URI
-	 * :/orderbooks/{orderBookId}/detailedstastitics
-	 * 
-	 * @param orderBookId
-	 * @return
-	 */
-	@ApiOperation(value = "Get order book detailed statistics at valid and invalid order level for a order book id", response = OrderBookDetailedStatisticsOutputDto.class)
-	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_VALID_INVALID_STATISTICS, method = RequestMethod.GET)
-	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookDetailedStatisticsOutputDto getOrderBookValidInvalidOrdersStats(@PathVariable Long orderBookId) {
-		return orderBookService.getOrderBookValidInvalidOrdersStats(orderBookId);
 	}
 
 	/**
@@ -134,6 +119,20 @@ public class OrderBookController {
 	public @ResponseBody OrderBookOutputDto addExecutionToBook(@PathVariable Long orderBookId, @RequestBody ExecutionInputDto executionInputDto) {
 		return orderBookService.addExecutionToBook(orderBookId, executionInputDto);
 
+	}
+	
+	@RequestMapping(value = "/gracefulShutdown", method = RequestMethod.GET)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public void gracefulShutDown()
+	{
+		try {
+			Thread.sleep(50000);
+			System.out.print("Hi I am in graceful shutdown");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

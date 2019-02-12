@@ -18,7 +18,7 @@ insert into order_book_inv(order_book_id,instrument_id,order_Book_Status,created
  values(2004,'VALID','LIMIT_ORDER',0);
  insert into orders_inv(order_id,order_Details_id,instrument_id,order_quantity,order_price,created_by,created_on,order_book_id)
  values(2004,2004,4,20,20,'Default User',sysdate,1003);
-
+ 
  insert into ORDERS_DETAILS_INV(order_Details_id,order_status,order_type,execution_quantity)
  values(2005,'VALID','LIMIT_ORDER',0); 
   insert into orders_inv(order_id,order_Details_id,instrument_id,order_quantity,order_price,created_by,created_on,order_book_id)

@@ -23,7 +23,6 @@ import com.cswm.assignment.applicationutils.ErrorMessageEnum;
 import com.cswm.assignment.applicationutils.OrderBookStatus;
 import com.cswm.assignment.applicationutils.OrderStatus;
 import com.cswm.assignment.applicationutils.OrderType;
-import com.cswm.assignment.applicationutils.OrderTypesInStatistics;
 import com.cswm.assignment.configuration.CustomModelMapper;
 import com.cswm.assignment.exceptions.ApplicationException;
 import com.cswm.assignment.exceptions.NotFoundException;
@@ -33,15 +32,14 @@ import com.cswm.assignment.model.Order;
 import com.cswm.assignment.model.OrderBook;
 import com.cswm.assignment.model.OrderDetails;
 import com.cswm.assignment.model.dto.ExecutionBo;
+import com.cswm.assignment.model.dto.OrderBo;
 import com.cswm.assignment.model.dto.OrderBookBo;
 import com.cswm.assignment.model.dto.OrderDetailsBo;
-import com.cswm.assignment.model.dto.OrderBo;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookDetailedStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 import com.cswm.assignment.repository.ExecutionRepository;
 import com.cswm.assignment.repository.InstrumentRepository;
@@ -190,17 +188,8 @@ public class OrderBookServiceImpl implements OrderBookService {
 		if (null == executionInputDto.getPrice() || executionInputDto.getPrice() == BigDecimal.ZERO)
 			throw new ApplicationException(ErrorMessageEnum.EXECUTION_PRICE_ZERO);
 		OrderBook orderBook = getOrderBook(orderBookId);
-		/*
-		 * TODO : need to ask which code to keep. Whether one condition fine as prev. or
-		 * need reason for rejection more specific. if
-		 * (!OrderBookStatus.CLOSED.equals(orderBookDto.getOrderBookStatus())) throw new
-		 * ApplicationException(ErrorMessageEnum.ORDER_BOOK_NOT_CLOSED);
-		 */
-
-		if (OrderBookStatus.OPEN.equals(orderBook.getOrderBookStatus()))
-			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_STATUS_OPEN);
-		if (OrderBookStatus.EXECUTED.equals(orderBook.getOrderBookStatus()))
-			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_STATUS_EXECUTED);
+		if (!OrderBookStatus.CLOSED.equals(orderBook.getOrderBookStatus()))
+			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_NOT_CLOSED);
 		if (!CollectionUtils.isEmpty(orderBook.getExecutions()) && !(executionInputDto.getPrice().compareTo(orderBook.getExecutions().iterator().next().getPrice()) == 0))
 			throw new ApplicationException(ErrorMessageEnum.EXECUTION_PRICE_INVALID);
 		ExecutionBo executionDto = new ModelMapper().map(executionInputDto, ExecutionBo.class);
@@ -214,7 +203,6 @@ public class OrderBookServiceImpl implements OrderBookService {
 			logger.info("addExecutionToBook() Method :: valid Orders in the Order Book are : ");
 			validOrders.forEach(orderDto -> logger.info("addExecutionToBook() Method :: " + orderDto.toString()));
 		}
-
 		Long totalDemand = 0l;
 		Long totalExecutions = 0l;
 		for (Order order : validOrders) {
@@ -224,16 +212,16 @@ public class OrderBookServiceImpl implements OrderBookService {
 		logger.info("addExecutionToBook() Method :: validDemands in the order Book = " + totalDemand);
 		logger.info("addExecutionToBook() Method :: totalExecutions in the order Book = " + totalExecutions);
 
-		Long effectiveQtyForCurrentExec = ((totalExecutions + executionDto.getQuantity()) >= totalDemand) ? (long) (totalDemand) : executionDto.getQuantity()+totalExecutions;
+		Long effectiveQtyForCurrentExec = ((totalExecutions + executionDto.getQuantity()) >= totalDemand) ? (long) (totalDemand) : executionDto.getQuantity() + totalExecutions;
 		logger.info("addExecutionToBook() Method :: effective Quantity for the execution = " + effectiveQtyForCurrentExec);
 		orderService.addExecutionQuantityToOrders(validOrders, totalDemand, effectiveQtyForCurrentExec);
 		Execution execution = new ModelMapper().map(executionDto, Execution.class);
 		logger.info("addExecutionToBook() Method :: Final Execution getting saved as " + execution);
 		executionRepository.save(execution);
 		if ((totalExecutions + executionDto.getQuantity()) >= totalDemand) {
-			logger.info("addExecutionToBook() Method :: execution executed partially as the effectice quantity for execution = " + (totalDemand-totalExecutions) + " and original execution quantity = "
-					+ execution.getQuantity());
-			executionDto.setQuantity(totalDemand-totalExecutions);
+			logger.info("addExecutionToBook() Method :: execution executed partially as the effectice quantity for execution = " + (totalDemand - totalExecutions)
+					+ " and original execution quantity = " + execution.getQuantity());
+			executionDto.setQuantity(totalDemand - totalExecutions);
 			orderBook.setOrderBookStatus(OrderBookStatus.EXECUTED);
 		}
 		orderBook = getOrderBook(orderBookId);
@@ -252,47 +240,75 @@ public class OrderBookServiceImpl implements OrderBookService {
 	public synchronized OrderBookStatisticsOutputDto getOrderBookStats(Long orderBookId) {
 		logger.info("getOrderBookStats() Method called with argument :: (" + orderBookId + ");");
 		OrderBook orderBook = getOrderBook(orderBookId);
-		Set<Order> bookOrders = orderBook.getOrders();
-		Map<OrderTypesInStatistics, OrderOutputDto> OrderTypeClassification = new HashMap<>();
-		Map<BigDecimal, Long> limitPriceVsDemandTable = new HashMap<>();
+		Map<BigDecimal, Long> limitBreakDownForAllOrders = new HashMap<>();
+		Map<BigDecimal, Long> limitBreakDownForValidOrders = new HashMap<>();
+		Map<BigDecimal, Long> limitBreakDownForInvalidOrders = new HashMap<>();
+		Long totalOrderDemand = 0l;
+		Long validOrderCount = 0l;
+		Long validDemand = 0l;
+		Long accumulatedExecutionQuantity = 0l;
+		LocalDateTime earliest = LocalDateTime.MAX;
+		LocalDateTime latest = LocalDateTime.MIN;
 
 		OrderBookStatisticsOutputDto orderBookStatsVo = new OrderBookStatisticsOutputDto();
-		orderBookStatsVo.setTotalNoOfOrders((long) bookOrders.size());
-
-		Long totalOrderDemand = 0l;
-		Long smallestOrderQuantity = Long.MAX_VALUE;
-		Long LargestOrderQuantity = Long.MIN_VALUE;
-		LocalDateTime earliest = LocalDateTime.MAX;
-		LocalDateTime Laetst = LocalDateTime.MIN;
-		for (Order order : bookOrders) {
-			totalOrderDemand = totalOrderDemand + order.getOrderQuantity();
-			if (order.getOrderDetails().getOrderType().equals(OrderType.LIMIT_ORDER) && limitPriceVsDemandTable.containsKey(order.getOrderprice())) {
-				Long newDemand = limitPriceVsDemandTable.get(order.getOrderprice()) + order.getOrderQuantity();
-				limitPriceVsDemandTable.put(order.getOrderprice(), newDemand);
-			} else if (order.getOrderDetails().getOrderType().equals(OrderType.LIMIT_ORDER)) {
-				limitPriceVsDemandTable.put(order.getOrderprice(), order.getOrderQuantity());
-			}
+		orderBookStatsVo.setTotalOrderCount((long) orderBook.getOrders().size());
+		for (Order order : orderBook.getOrders()) {
 			OrderOutputDto orderDto = CustomModelMapper.getOrderModelMapper().map(order, OrderOutputDto.class);
-			if (smallestOrderQuantity > order.getOrderQuantity()) {
-				smallestOrderQuantity = order.getOrderQuantity();
-				OrderTypeClassification.put(OrderTypesInStatistics.SMALLEST_ORDER, orderDto);
+			totalOrderDemand = totalOrderDemand + order.getOrderQuantity();
+
+			if (order.getOrderDetails().getOrderType().equals(OrderType.LIMIT_ORDER) && limitBreakDownForAllOrders.containsKey(order.getOrderprice())) {
+				Long newDemand = limitBreakDownForAllOrders.get(order.getOrderprice()) + order.getOrderQuantity();
+				limitBreakDownForAllOrders.put(order.getOrderprice(), newDemand);
+				if (order.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID)) {
+					limitBreakDownForValidOrders.put(order.getOrderprice(), newDemand);
+				} else {
+					limitBreakDownForInvalidOrders.put(order.getOrderprice(), newDemand);
+				}
+			} else if (order.getOrderDetails().getOrderType().equals(OrderType.LIMIT_ORDER)) {
+				limitBreakDownForAllOrders.put(order.getOrderprice(), order.getOrderQuantity());
+				if (order.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID)) {
+					limitBreakDownForValidOrders.put(order.getOrderprice(), order.getOrderQuantity());
+				} else {
+					limitBreakDownForInvalidOrders.put(order.getOrderprice(), order.getOrderQuantity());
+				}
 			}
-			if (LargestOrderQuantity < order.getOrderQuantity()) {
-				LargestOrderQuantity = order.getOrderQuantity();
-				OrderTypeClassification.put(OrderTypesInStatistics.BIGGEST_ORDER, orderDto);
+
+			if (order.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID)) {
+				validDemand = validDemand + order.getOrderQuantity();
+				validOrderCount++;
+				accumulatedExecutionQuantity = accumulatedExecutionQuantity + (order.getOrderDetails().getExecutionQuantity());
 			}
-			if (earliest.compareTo(order.getCreatedOn()) > 1) {
+
+			if (null == orderBookStatsVo.getSmallestOrder() || orderBookStatsVo.getSmallestOrder().getOrderQuantity() > order.getOrderQuantity()) {
+				orderBookStatsVo.setSmallestOrder(orderDto);
+			}
+			if (null == orderBookStatsVo.getBiggestOrder() || orderBookStatsVo.getBiggestOrder().getOrderQuantity() < order.getOrderQuantity()) {
+				orderBookStatsVo.setBiggestOrder(orderDto);
+			}
+			if (null == orderBookStatsVo.getEarliestOrder() || earliest.compareTo(order.getCreatedOn()) > 0) {
 				earliest = order.getCreatedOn();
-				OrderTypeClassification.put(OrderTypesInStatistics.EARLIEST_ORDER, orderDto);
+				orderBookStatsVo.setEarliestOrder(orderDto);
 			}
-			if (Laetst.compareTo(order.getCreatedOn()) < 1) {
-				Laetst = order.getCreatedOn();
-				OrderTypeClassification.put(OrderTypesInStatistics.LATEST_ORDER, orderDto);
+			if (null == orderBookStatsVo.getLastOrder() || latest.compareTo(order.getCreatedOn()) < 0) {
+				latest = order.getCreatedOn();
+				orderBookStatsVo.setLastOrder(orderDto);
 			}
 		}
-		orderBookStatsVo.setLimitPriceVsDemandTable(limitPriceVsDemandTable);
-		orderBookStatsVo.setOrderTypesInStats(OrderTypeClassification);
-		orderBookStatsVo.setTotalNoofAccuOrders(totalOrderDemand);
+		orderBookStatsVo.setValidOrderCount(validOrderCount);
+		orderBookStatsVo.setInValidOrderCount(orderBookStatsVo.getTotalOrderCount() - validOrderCount);
+
+		orderBookStatsVo.setTotalDemand(totalOrderDemand);
+		orderBookStatsVo.setValidDemand(validDemand);
+		orderBookStatsVo.setInValidDemand(totalOrderDemand - validDemand);
+
+		if (!CollectionUtils.isEmpty(orderBook.getExecutions())) {
+			orderBookStatsVo.setExecutionPrice(orderBook.getExecutions().iterator().next().getPrice());
+		}
+		orderBookStatsVo.setAccumulatedExecutionQuantity(accumulatedExecutionQuantity);
+		orderBookStatsVo.setLimitBreakDownForAllOrders(limitBreakDownForAllOrders);
+		orderBookStatsVo.setLimitBreakDownForInvalidOrders(limitBreakDownForInvalidOrders);
+		orderBookStatsVo.setLimitBreakDownForValidOrders(limitBreakDownForValidOrders);
+
 		logger.info("getOrderBookStats() Method returned value :: (" + orderBookStatsVo + ");");
 		return orderBookStatsVo;
 	}
@@ -321,39 +337,4 @@ public class OrderBookServiceImpl implements OrderBookService {
 		return validOrders;
 
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.cswm.assignment.service.OrderBookService#
-	 * getOrderBookValidInvalidOrdersStats(java.lang.Long)
-	 */
-	@Override
-	public OrderBookDetailedStatisticsOutputDto getOrderBookValidInvalidOrdersStats(Long orderBookId) {
-		logger.info("getValidOrders() Method called with argument :: (" + orderBookId + ");");
-		OrderBookDetailedStatisticsOutputDto bookValidInValidStatistics = new OrderBookDetailedStatisticsOutputDto(getOrderBookStats(orderBookId));
-
-		OrderBook orderBook = getOrderBook(orderBookId);
-		Set<Order> bookOrders = orderBook.getOrders();
-		BigDecimal executionPrice = (CollectionUtils.isEmpty(orderBook.getExecutions()) ? BigDecimal.ZERO : orderBook.getExecutions().iterator().next().getPrice());
-		Set<Order> validOrders = bookOrders.stream().filter(orderDto -> orderDto.getOrderDetails().getOrderStatus().equals(OrderStatus.VALID)).collect(Collectors.toSet());
-
-		bookValidInValidStatistics.setValidOrderCount((long) validOrders.size());
-		bookValidInValidStatistics.setInValidOrderCount((long) (bookOrders.size() - validOrders.size()));
-
-		Long validDemand = 0l;
-		Long totalExecutionQuqntity = 0l;
-		for (Order order : validOrders) {
-			validDemand = validDemand + order.getOrderQuantity();
-			totalExecutionQuqntity = totalExecutionQuqntity + (order.getOrderDetails().getExecutionQuantity());
-		}
-		bookValidInValidStatistics.setValidDemand(validDemand);
-		bookValidInValidStatistics.setExecutionQty(totalExecutionQuqntity);
-
-		bookValidInValidStatistics.setInValidDemand(bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoofAccuOrders() - validDemand);
-		bookValidInValidStatistics.setTotalExecutionPrice(executionPrice.multiply(BigDecimal.valueOf(totalExecutionQuqntity)));
-		logger.info("getOrderBookValidInvalidOrdersStats() Method returned value :: (" + bookValidInValidStatistics + ");");
-		return bookValidInValidStatistics;
-	}
-
 }

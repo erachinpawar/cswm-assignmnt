@@ -6,17 +6,10 @@ import com.cswm.assignment.applicationutils.OrderStatus;
 
 public class OrderStatisticsOutputDto {
 
-	private OrderBookOutputDto order;
+	private Long orderId;
 	private BigDecimal executionPrice;
 	private OrderStatus orderStatus;
-
-	public OrderBookOutputDto getOrder() {
-		return order;
-	}
-
-	public void setOrder(OrderBookOutputDto order) {
-		this.order = order;
-	}
+	private Long executionQuantity;
 
 	public BigDecimal getExecutionPrice() {
 		return executionPrice;
@@ -34,9 +27,25 @@ public class OrderStatisticsOutputDto {
 		this.orderStatus = orderStatus;
 	}
 
+	public Long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+
+	public Long getExecutionQuantity() {
+		return executionQuantity;
+	}
+
+	public void setExecutionQuantity(Long executionQuantity) {
+		this.executionQuantity = executionQuantity;
+	}
+
 	@Override
 	public String toString() {
-		return "OrderStatsVo [order=" + order + ", executionPrice=" + executionPrice + ", orderStatus=" + orderStatus + "]";
+		return "OrderStatisticsOutputDto [orderId=" + orderId + ", executionPrice=" + executionPrice + ", orderStatus=" + orderStatus + ", executionQuantity=" + executionQuantity + "]";
 	}
 
 }

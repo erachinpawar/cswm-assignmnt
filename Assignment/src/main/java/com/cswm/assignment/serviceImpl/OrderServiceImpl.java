@@ -1,6 +1,5 @@
 package com.cswm.assignment.serviceImpl;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -14,9 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.cswm.assignment.applicationutils.ErrorMessageEnum;
 import com.cswm.assignment.exceptions.NotFoundException;
-import com.cswm.assignment.model.Execution;
 import com.cswm.assignment.model.Order;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderStatisticsOutputDto;
 import com.cswm.assignment.repository.OrderRepository;
 import com.cswm.assignment.service.OrderService;
@@ -32,22 +29,6 @@ public class OrderServiceImpl implements OrderService {
 	private OrderRepository orderRepository;
 	private final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-	/**
-	 * Sorts the list of the valid orders based on the order quantity. This is used
-	 * for the distribution of the remaining partial executions to the lowest
-	 * quantity order first.
-	 * 
-	 * @param updatedValidOrders
-	 * @return Sorted list of valid orders
-	 */
-	private List<Order> sortOrders(List<Order> updatedValidOrders) {
-		logger.info("sortOrders() Method called with argument :: (" + updatedValidOrders.toString() + ");");
-		updatedValidOrders.sort((a, b) -> Long.compare((long) (null == a.getOrderDetails().getExecutionQuantity() ? 0.0 : a.getOrderDetails().getExecutionQuantity()),
-				(long) (null == b.getOrderDetails().getExecutionQuantity() ? 0.0 : b.getOrderDetails().getExecutionQuantity())));
-		logger.info("sortOrders() Method returned value :: (" + updatedValidOrders.toString() + ");");
-		return updatedValidOrders;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -56,7 +37,7 @@ public class OrderServiceImpl implements OrderService {
 	 * util.Set, java.lang.Long, java.lang.Long)
 	 */
 	@Override
-	public synchronized List<Order> addExecutionQuantityToOrders(Set<Order> validOrders, Long accumltdOrders, Long effectiveQuanty) {
+	public List<Order> addExecutionQuantityToOrders(Set<Order> validOrders, Long accumltdOrders, Long effectiveQuanty) {
 		logger.info("addExecutionQuantityToOrders() Method called with argument :: (" + validOrders.toString() + "," + accumltdOrders + "," + effectiveQuanty + ");");
 		List<Order> updatedValidOrders = new ArrayList<>();
 		Long addedExecution = 0l;
@@ -75,7 +56,10 @@ public class OrderServiceImpl implements OrderService {
 
 			updatedValidOrders.add(order);
 		}
-		sortOrders(updatedValidOrders);
+		logger.info("Valid Orders before sorting :: (" + updatedValidOrders.toString() + ");");
+		updatedValidOrders.sort((a, b) -> Long.compare((long) (null == a.getOrderDetails().getExecutionQuantity() ? 0.0 : a.getOrderDetails().getExecutionQuantity()),
+				(long) (null == b.getOrderDetails().getExecutionQuantity() ? 0.0 : b.getOrderDetails().getExecutionQuantity())));
+		logger.info("Valid Orders after sorting :: (" + updatedValidOrders.toString() + ");");
 		updatedValidOrders = completeDeltaQty(addedExecution, effectiveQuanty, updatedValidOrders);
 		for (Order order : updatedValidOrders) {
 			orderRepository.save(order);
@@ -96,13 +80,11 @@ public class OrderServiceImpl implements OrderService {
 	private List<Order> completeDeltaQty(Long addedExecution, Long effectiveQuanty, List<Order> updatedValidOrders) {
 		logger.info("completeDeltaQty() Method called with argument :: (" + addedExecution + "," + effectiveQuanty + "," + updatedValidOrders.toString() + ");");
 		List<Order> updatedValidOrderList = new ArrayList<>();
-		while (addedExecution <= effectiveQuanty) {
-			if (addedExecution.equals(effectiveQuanty))
-				break;
+		outer: while (addedExecution <= effectiveQuanty) {
 			for (Order order : updatedValidOrders) {
 				if (addedExecution.equals(effectiveQuanty))
-					break;
-				else if ((!addedExecution.equals(effectiveQuanty)) && (order.getOrderQuantity().longValue() <= order.getOrderDetails().getExecutionQuantity().longValue())) {
+					break outer;
+				else if (order.getOrderQuantity().longValue() <= order.getOrderDetails().getExecutionQuantity().longValue()) {
 					updatedValidOrderList.add(order);
 				} else {
 					order.getOrderDetails().setExecutionQuantity(order.getOrderDetails().getExecutionQuantity() + 1);
@@ -111,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
 				}
 			}
 		}
-		logger.info("updateTotalValidOrders() Method returned value :: (" + updatedValidOrderList + ");");
+		logger.info("completeDeltaQty() Method returned value :: (" + updatedValidOrderList + ");");
 		return updatedValidOrderList;
 	}
 
@@ -123,13 +105,10 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public synchronized OrderStatisticsOutputDto getOrderStats(Long orderId) {
 		logger.info("getOrderStats() Method called with argument :: (" + orderId + ");");
-		OrderStatisticsOutputDto orderStatsVo = new OrderStatisticsOutputDto();
 		Order order = orderRepository.findFirstByOrderId(orderId).orElseThrow(() -> new NotFoundException(ErrorMessageEnum.ORDER_NOT_FOUND));
-		orderStatsVo.setOrder(new ModelMapper().map(order, OrderBookOutputDto.class));
+		OrderStatisticsOutputDto orderStatsVo = new ModelMapper().map(order, OrderStatisticsOutputDto.class);
 		if (!CollectionUtils.isEmpty(order.getOrderBook().getExecutions())) {
-			Execution execution = order.getOrderBook().getExecutions().iterator().next();
-			orderStatsVo.setExecutionPrice(
-					(null == order.getOrderDetails().getExecutionQuantity() ? BigDecimal.ZERO : BigDecimal.valueOf(order.getOrderDetails().getExecutionQuantity())).multiply(execution.getPrice()));
+			orderStatsVo.setExecutionPrice(order.getOrderBook().getExecutions().iterator().next().getPrice());
 		}
 		logger.info("getOrderStats() Method returned value :: (" + orderStatsVo + ");");
 		return orderStatsVo;

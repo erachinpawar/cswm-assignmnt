@@ -19,11 +19,10 @@ public enum ErrorMessageEnum {
 	BOOK_STATUS_NOT_OPEN("Order Book Status should be open to close it."),
 	EXECUTION_QTY_INVALID("Execution Quantity Invalid."),
 	EXECUTION_PRICE_INVALID("Execution price is not equal to prev executions."),
-	ORDER_BOOK_STATUS_OPEN("Can not add executions to the open order book."),
-	ORDER_BOOK_STATUS_EXECUTED("Order book fully executed. Can't add execution."),
 	ORDER_BOOK_EXECUTED("Order Book Fully executed.No more executions allowed."),
 	PARTIALLY_EXECUTED("Execution Partially executed as the order demand limit for the book is reached."),
-	ORDER_NOT_FOUND("Order Id not present in the system"), EXECUTION_PRICE_ZERO("Execution price can not be zero");
+	ORDER_NOT_FOUND("Order Id not present in the system"), EXECUTION_PRICE_ZERO("Execution price can not be zero"), 
+	ORDER_BOOK_NOT_CLOSED("Order book status is not closed. Order book status should be closed in order to add execution.");
 
 	private String message;
 

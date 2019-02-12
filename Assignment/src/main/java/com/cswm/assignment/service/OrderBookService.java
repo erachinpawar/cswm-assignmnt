@@ -7,7 +7,6 @@ import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookDetailedStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 
 @Service
@@ -54,19 +53,4 @@ public interface OrderBookService {
 	 * @return OrderBookStatisticsDto object containing order book statistics
 	 */
 	OrderBookStatisticsOutputDto getOrderBookStats(Long orderBookId);
-
-	/**
-	 * Used to get the detailed order book statistics at valid and invalid order level.
-	 * amount of valid/invalid orders in each book, 
-	 * valid/invalid demand, 
-	 * the biggest order
-	 * the smallest order, the earliest order entry, the last order entry, 
-	 * limit break down (a table with limit prices and demand limit price)
-	 * accumulated execution quantity and execution price.
-	 * @param orderBookId
-	 * @return OrderBookValidInValidStatistics object containing order book statistics at valid and invalid order level
-	 */
-	OrderBookDetailedStatisticsOutputDto getOrderBookValidInvalidOrdersStats(Long orderBookId);
-
-
 }

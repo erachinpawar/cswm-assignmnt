@@ -17,14 +17,12 @@ import com.cswm.assignment.applicationutils.ErrorMessageEnum;
 import com.cswm.assignment.applicationutils.OrderBookStatus;
 import com.cswm.assignment.applicationutils.OrderStatus;
 import com.cswm.assignment.applicationutils.OrderType;
-import com.cswm.assignment.applicationutils.OrderTypesInStatistics;
 import com.cswm.assignment.model.Message;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookDetailedStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderStatisticsOutputDto;
 
@@ -36,7 +34,7 @@ public class orderBookTest extends AbstractTest {
 	public void newOrderBookTest() throws Exception {
 		String uri = "/orderbooks/create";
 		OrderBookInputDto bookInputDto = new OrderBookInputDto();
-		bookInputDto.setInstrumentId(1l);
+		bookInputDto.setInstrumentId(10l);
 
 		String inputJson = super.mapToJson(bookInputDto);
 		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
@@ -286,7 +284,7 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
 		assertEquals(406, status);
-		assertEquals(ErrorMessageEnum.ORDER_BOOK_STATUS_OPEN.getMessage(), message.getMessage());
+		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_CLOSED.getMessage(), message.getMessage());
 	}
 
 	@Test
@@ -349,7 +347,7 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		Message message = mapFromJson(content, Message.class);
 		assertEquals(406, status);
-		assertEquals(ErrorMessageEnum.ORDER_BOOK_STATUS_EXECUTED.getMessage(), message.getMessage());
+		assertEquals(ErrorMessageEnum.ORDER_BOOK_NOT_CLOSED.getMessage(), message.getMessage());
 	}
 
 	//// get Order Book Stats
@@ -361,33 +359,21 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookStatisticsOutputDto orderBookStatisticsDto = mapFromJson(content, OrderBookStatisticsOutputDto.class);
 		assertEquals(200, status);
-		assertEquals(4l, orderBookStatisticsDto.getTotalNoOfOrders().longValue());
-		assertEquals(200l, orderBookStatisticsDto.getTotalNoofAccuOrders().longValue());
-		assertEquals(2007l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
-		assertEquals(2006l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
-		assertEquals(2004l, orderBookStatisticsDto.getOrderTypesInStats().get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
-
-	}
-
-	@Test
-	public void getOrderBookValidInValidStatistics() throws Exception {
-		String uri = "/orderbooks/1003/detailedstastitics";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON)).andReturn();
-		int status = mvcResult.getResponse().getStatus();
-		String content = mvcResult.getResponse().getContentAsString();
-		OrderBookDetailedStatisticsOutputDto bookValidInValidStatistics = mapFromJson(content, OrderBookDetailedStatisticsOutputDto.class);
-		assertEquals(200, status);
-		assertEquals(4l, bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoOfOrders().longValue());
-		assertEquals(200l, bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoofAccuOrders().longValue());
-		assertEquals(3l, bookValidInValidStatistics.getValidOrderCount().longValue());
-		assertEquals(1l, bookValidInValidStatistics.getInValidOrderCount().longValue());
-		assertEquals(20l, bookValidInValidStatistics.getInValidDemand().longValue());
-		assertEquals(180l, bookValidInValidStatistics.getValidDemand().longValue());
-		assertEquals(180l, bookValidInValidStatistics.getExecutionQty().longValue());
-		assertEquals(0, BigDecimal.valueOf(1600l).compareTo(bookValidInValidStatistics.getTotalExecutionPrice()));
-		assertEquals(2007l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats().get(OrderTypesInStatistics.LATEST_ORDER).getOrderId().longValue());
-		assertEquals(2006l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats().get(OrderTypesInStatistics.BIGGEST_ORDER).getOrderId().longValue());
-		assertEquals(2004l, bookValidInValidStatistics.getOrderBookStatisticsDto().getOrderTypesInStats().get(OrderTypesInStatistics.SMALLEST_ORDER).getOrderId().longValue());
+		assertEquals(4l, orderBookStatisticsDto.getTotalOrderCount().longValue());
+		assertEquals(3l, orderBookStatisticsDto.getValidOrderCount().longValue());
+		assertEquals(1l, orderBookStatisticsDto.getInValidOrderCount().longValue());
+		assertEquals(200l, orderBookStatisticsDto.getTotalDemand().longValue());
+		assertEquals(20l, orderBookStatisticsDto.getInValidDemand().longValue());
+		assertEquals(180l, orderBookStatisticsDto.getValidDemand().longValue());
+		assertEquals(2007l, orderBookStatisticsDto.getLastOrder().getOrderId().longValue());
+		assertEquals(2006l, orderBookStatisticsDto.getBiggestOrder().getOrderId().longValue());
+		assertEquals(2004l, orderBookStatisticsDto.getSmallestOrder().getOrderId().longValue());
+		assertEquals(2004l, orderBookStatisticsDto.getEarliestOrder().getOrderId().longValue());
+		assertEquals(180l, orderBookStatisticsDto.getAccumulatedExecutionQuantity().longValue());
+		assertEquals(0, BigDecimal.valueOf(40l).compareTo(orderBookStatisticsDto.getExecutionPrice()));
+		assertEquals(2, orderBookStatisticsDto.getLimitBreakDownForAllOrders().size());
+		assertEquals(1, orderBookStatisticsDto.getLimitBreakDownForInvalidOrders().size());
+		assertEquals(1, orderBookStatisticsDto.getLimitBreakDownForValidOrders().size());
 
 	}
 
@@ -410,7 +396,22 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderStatisticsOutputDto orderStatisticsDto = mapFromJson(content, OrderStatisticsOutputDto.class);
 		assertEquals(200, status);
-		assertEquals(2000l, orderStatisticsDto.getExecutionPrice().longValue());
+		assertEquals(40l, orderStatisticsDto.getExecutionPrice().longValue());
 
 	}
+	
+
+	@Test
+	public void getGraceFul() throws Exception {
+		String uri = "/gracefulShutdown";
+		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON)).andReturn();
+		int status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		OrderStatisticsOutputDto orderStatisticsDto = mapFromJson(content, OrderStatisticsOutputDto.class);
+		assertEquals(200, status);
+		assertEquals(40l, orderStatisticsDto.getExecutionPrice().longValue());
+
+	}
+	
+	
 }
