@@ -18,7 +18,7 @@ import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookValidInValidStatisticsOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookDetailedStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderStatisticsOutputDto;
 import com.cswm.assignment.service.OrderBookService;
@@ -55,10 +55,10 @@ public class OrderBookController {
 	 * @param orderBookId
 	 * @return
 	 */
-	@ApiOperation(value = "Get order book detailed statistics at valid and invalid order level for a order book id", response = OrderBookValidInValidStatisticsOutputDto.class)
+	@ApiOperation(value = "Get order book detailed statistics at valid and invalid order level for a order book id", response = OrderBookDetailedStatisticsOutputDto.class)
 	@RequestMapping(value = UrlConstants.URL_GET_ORDER_BOOK_VALID_INVALID_STATISTICS, method = RequestMethod.GET)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookValidInValidStatisticsOutputDto getOrderBookValidInvalidOrdersStats(@PathVariable Long orderBookId) {
+	public @ResponseBody OrderBookDetailedStatisticsOutputDto getOrderBookValidInvalidOrdersStats(@PathVariable Long orderBookId) {
 		return orderBookService.getOrderBookValidInvalidOrdersStats(orderBookId);
 	}
 

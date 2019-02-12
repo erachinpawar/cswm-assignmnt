@@ -2,7 +2,7 @@ package com.cswm.assignment.model.dto;
 
 import java.time.LocalDateTime;
 
-public class InstrumentDto {
+public class InstrumentBo {
 
 	private Long instrumentId;
 
@@ -10,7 +10,7 @@ public class InstrumentDto {
 
 	private LocalDateTime createdOn;
 
-	public InstrumentDto() {
+	public InstrumentBo() {
 	}
 
 	public Long getInstrumentId() {

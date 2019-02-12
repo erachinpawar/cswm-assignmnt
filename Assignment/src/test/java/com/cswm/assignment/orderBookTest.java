@@ -24,7 +24,7 @@ import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookValidInValidStatisticsOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookDetailedStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderStatisticsOutputDto;
 
@@ -375,7 +375,7 @@ public class orderBookTest extends AbstractTest {
 		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
-		OrderBookValidInValidStatisticsOutputDto bookValidInValidStatistics = mapFromJson(content, OrderBookValidInValidStatisticsOutputDto.class);
+		OrderBookDetailedStatisticsOutputDto bookValidInValidStatistics = mapFromJson(content, OrderBookDetailedStatisticsOutputDto.class);
 		assertEquals(200, status);
 		assertEquals(4l, bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoOfOrders().longValue());
 		assertEquals(200l, bookValidInValidStatistics.getOrderBookStatisticsDto().getTotalNoofAccuOrders().longValue());

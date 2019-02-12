@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-public class ExecutionDto {
+public class ExecutionBo {
 
 	private Long executionId;
 
@@ -14,13 +14,13 @@ public class ExecutionDto {
 	private Long quantity;
 
 	@JsonBackReference
-	private OrderBookDto orderBook;
+	private OrderBookBo orderBook;
 
 	private String createdBy;
 
 	private LocalDateTime createdOn;
 
-	public ExecutionDto() {
+	public ExecutionBo() {
 	}
 
 	public Long getExecutionId() {
@@ -47,11 +47,11 @@ public class ExecutionDto {
 		this.quantity = quantity;
 	}
 
-	public OrderBookDto getOrderBook() {
+	public OrderBookBo getOrderBook() {
 		return orderBook;
 	}
 
-	public void setOrderBook(OrderBookDto orderBook) {
+	public void setOrderBook(OrderBookBo orderBook) {
 		this.orderBook = orderBook;
 	}
 

@@ -32,16 +32,16 @@ import com.cswm.assignment.model.Instrument;
 import com.cswm.assignment.model.Order;
 import com.cswm.assignment.model.OrderBook;
 import com.cswm.assignment.model.OrderDetails;
-import com.cswm.assignment.model.dto.ExecutionDto;
-import com.cswm.assignment.model.dto.OrderBookDto;
-import com.cswm.assignment.model.dto.OrderDetailsDto;
-import com.cswm.assignment.model.dto.OrderDto;
+import com.cswm.assignment.model.dto.ExecutionBo;
+import com.cswm.assignment.model.dto.OrderBookBo;
+import com.cswm.assignment.model.dto.OrderDetailsBo;
+import com.cswm.assignment.model.dto.OrderBo;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookValidInValidStatisticsOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookDetailedStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 import com.cswm.assignment.repository.ExecutionRepository;
 import com.cswm.assignment.repository.InstrumentRepository;
@@ -135,9 +135,9 @@ public class OrderBookServiceImpl implements OrderBookService {
 			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_NOT_OPEN);
 		if (!orderBook.getInstrument().getInstrumentId().equals(addOrderInputDto.getInstrumentId()))
 			throw new ApplicationException(ErrorMessageEnum.ORDER_NOT_BELONG_TO_INSTRUMENT);
-		OrderDto orderDto = new ModelMapper().map(addOrderInputDto, OrderDto.class);
+		OrderBo orderDto = new ModelMapper().map(addOrderInputDto, OrderBo.class);
 		if (null == orderDto.getOrderDetails())
-			orderDto.setOrderDetails(new OrderDetailsDto());
+			orderDto.setOrderDetails(new OrderDetailsBo());
 		if (null == orderDto.getOrderprice() || orderDto.getOrderprice() == BigDecimal.ZERO) {
 			logger.info("createOrderBook() Method  :: No order Price is provided in order creation hence marking order as MARKET ORDER");
 			orderDto.getOrderDetails().setOrderType(OrderType.MARKET_ORDER);
@@ -145,7 +145,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 			logger.info("createOrderBook() Method  :: Order Price is provided in order creation hence marking order as LIMIT_ORDER");
 			orderDto.getOrderDetails().setOrderType(OrderType.LIMIT_ORDER);
 		}
-		orderDto.setOrderBook(new ModelMapper().map(orderBook, OrderBookDto.class));
+		orderDto.setOrderBook(new ModelMapper().map(orderBook, OrderBookBo.class));
 		orderDto.getOrderDetails().setOrderStatus(OrderStatus.VALID);
 		orderDto.setCreatedOn(LocalDateTime.now());
 		orderDto.setCreatedBy(ApplicationConstants.DEFAULT_USER);
@@ -203,8 +203,8 @@ public class OrderBookServiceImpl implements OrderBookService {
 			throw new ApplicationException(ErrorMessageEnum.ORDER_BOOK_STATUS_EXECUTED);
 		if (!CollectionUtils.isEmpty(orderBook.getExecutions()) && !(executionInputDto.getPrice().compareTo(orderBook.getExecutions().iterator().next().getPrice()) == 0))
 			throw new ApplicationException(ErrorMessageEnum.EXECUTION_PRICE_INVALID);
-		ExecutionDto executionDto = new ModelMapper().map(executionInputDto, ExecutionDto.class);
-		executionDto.setOrderBook(new ModelMapper().map(orderBook, OrderBookDto.class));
+		ExecutionBo executionDto = new ModelMapper().map(executionInputDto, ExecutionBo.class);
+		executionDto.setOrderBook(new ModelMapper().map(orderBook, OrderBookBo.class));
 		Set<Order> validOrders = new HashSet<Order>();
 		if (CollectionUtils.isEmpty(orderBook.getExecutions())) {
 			logger.info("addExecutionToBook() Method :: Adding the first execution to the OrderBook So Marking the orders as Valid/Invalid");
@@ -329,9 +329,9 @@ public class OrderBookServiceImpl implements OrderBookService {
 	 * getOrderBookValidInvalidOrdersStats(java.lang.Long)
 	 */
 	@Override
-	public OrderBookValidInValidStatisticsOutputDto getOrderBookValidInvalidOrdersStats(Long orderBookId) {
+	public OrderBookDetailedStatisticsOutputDto getOrderBookValidInvalidOrdersStats(Long orderBookId) {
 		logger.info("getValidOrders() Method called with argument :: (" + orderBookId + ");");
-		OrderBookValidInValidStatisticsOutputDto bookValidInValidStatistics = new OrderBookValidInValidStatisticsOutputDto(getOrderBookStats(orderBookId));
+		OrderBookDetailedStatisticsOutputDto bookValidInValidStatistics = new OrderBookDetailedStatisticsOutputDto(getOrderBookStats(orderBookId));
 
 		OrderBook orderBook = getOrderBook(orderBookId);
 		Set<Order> bookOrders = orderBook.getOrders();

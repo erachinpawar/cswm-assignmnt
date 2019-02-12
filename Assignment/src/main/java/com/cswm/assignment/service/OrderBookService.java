@@ -7,7 +7,7 @@ import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
-import com.cswm.assignment.model.dto.ouputDto.OrderBookValidInValidStatisticsOutputDto;
+import com.cswm.assignment.model.dto.ouputDto.OrderBookDetailedStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
 
 @Service
@@ -66,7 +66,7 @@ public interface OrderBookService {
 	 * @param orderBookId
 	 * @return OrderBookValidInValidStatistics object containing order book statistics at valid and invalid order level
 	 */
-	OrderBookValidInValidStatisticsOutputDto getOrderBookValidInvalidOrdersStats(Long orderBookId);
+	OrderBookDetailedStatisticsOutputDto getOrderBookValidInvalidOrdersStats(Long orderBookId);
 
 
 }

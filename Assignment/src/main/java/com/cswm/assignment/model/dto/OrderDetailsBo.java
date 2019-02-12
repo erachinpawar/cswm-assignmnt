@@ -3,7 +3,7 @@ package com.cswm.assignment.model.dto;
 import com.cswm.assignment.applicationutils.OrderStatus;
 import com.cswm.assignment.applicationutils.OrderType;
 
-public class OrderDetailsDto {
+public class OrderDetailsBo {
 
 	private Long orderDetailsId;
 

@@ -2,7 +2,7 @@ package com.cswm.assignment.model.dto.ouputDto;
 
 import java.math.BigDecimal;
 
-public class OrderBookValidInValidStatisticsOutputDto {
+public class OrderBookDetailedStatisticsOutputDto {
 
 	private Long validOrderCount;
 	private Long inValidOrderCount;
@@ -12,9 +12,9 @@ public class OrderBookValidInValidStatisticsOutputDto {
 	private BigDecimal totalExecutionPrice;
 	private OrderBookStatisticsOutputDto orderBookStatisticsDto;
 	
-	public OrderBookValidInValidStatisticsOutputDto() {	}	
+	public OrderBookDetailedStatisticsOutputDto() {	}	
 
-	public OrderBookValidInValidStatisticsOutputDto(OrderBookStatisticsOutputDto orderBookStats) {
+	public OrderBookDetailedStatisticsOutputDto(OrderBookStatisticsOutputDto orderBookStats) {
 		this.orderBookStatisticsDto = orderBookStats;
 	}
 

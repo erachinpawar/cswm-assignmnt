@@ -6,17 +6,17 @@ import java.util.Set;
 
 import com.cswm.assignment.applicationutils.OrderBookStatus;
 
-public class OrderBookDto {
+public class OrderBookBo {
 
 	private Long orderBookId;
 
-	private InstrumentDto instrument;
+	private InstrumentBo instrument;
 
 	private OrderBookStatus orderBookStatus;
 
-	private Set<ExecutionDto> executions;
+	private Set<ExecutionBo> executions;
 
-	private Set<OrderDto> orders;
+	private Set<OrderBo> orders;
 
 	private String createdBy;
 
@@ -30,11 +30,11 @@ public class OrderBookDto {
 		this.orderBookId = orderBookId;
 	}
 
-	public InstrumentDto getInstrument() {
+	public InstrumentBo getInstrument() {
 		return instrument;
 	}
 
-	public void setInstrument(InstrumentDto instrument) {
+	public void setInstrument(InstrumentBo instrument) {
 		this.instrument = instrument;
 	}
 
@@ -46,19 +46,19 @@ public class OrderBookDto {
 		this.orderBookStatus = orderBookStatus;
 	}
 
-	public Set<ExecutionDto> getExecutions() {
+	public Set<ExecutionBo> getExecutions() {
 		return executions;
 	}
 
-	public void setExecutions(Set<ExecutionDto> executions) {
+	public void setExecutions(Set<ExecutionBo> executions) {
 		this.executions = executions;
 	}
 
-	public Set<OrderDto> getOrders() {
+	public Set<OrderBo> getOrders() {
 		return orders;
 	}
 
-	public void setOrders(Set<OrderDto> orders) {
+	public void setOrders(Set<OrderBo> orders) {
 		this.orders = orders;
 	}
 

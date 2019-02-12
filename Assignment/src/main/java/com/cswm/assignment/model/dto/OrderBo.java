@@ -5,16 +5,16 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-public class OrderDto {
+public class OrderBo {
 
 	private Long orderId;
 
-	private InstrumentDto instrument;
+	private InstrumentBo instrument;
 
 	@JsonBackReference
-	private OrderBookDto orderBook;
+	private OrderBookBo orderBook;
 
-	private OrderDetailsDto orderDetails;
+	private OrderDetailsBo orderDetails;
 
 	private Long orderQuantity;
 
@@ -24,7 +24,7 @@ public class OrderDto {
 
 	private LocalDateTime createdOn;
 
-	public OrderDto() {
+	public OrderBo() {
 	}
 
 	public Long getOrderId() {
@@ -35,27 +35,27 @@ public class OrderDto {
 		this.orderId = orderId;
 	}
 
-	public InstrumentDto getInstrument() {
+	public InstrumentBo getInstrument() {
 		return instrument;
 	}
 
-	public void setInstrument(InstrumentDto instrument) {
+	public void setInstrument(InstrumentBo instrument) {
 		this.instrument = instrument;
 	}
 
-	public OrderBookDto getOrderBook() {
+	public OrderBookBo getOrderBook() {
 		return orderBook;
 	}
 
-	public void setOrderBook(OrderBookDto orderBook) {
+	public void setOrderBook(OrderBookBo orderBook) {
 		this.orderBook = orderBook;
 	}
 
-	public OrderDetailsDto getOrderDetails() {
+	public OrderDetailsBo getOrderDetails() {
 		return orderDetails;
 	}
 
-	public void setOrderDetails(OrderDetailsDto orderDetails) {
+	public void setOrderDetails(OrderDetailsBo orderDetails) {
 		this.orderDetails = orderDetails;
 	}
 
