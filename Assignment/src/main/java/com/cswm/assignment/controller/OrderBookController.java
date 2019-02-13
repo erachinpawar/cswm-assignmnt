@@ -121,18 +121,4 @@ public class OrderBookController {
 
 	}
 	
-	@RequestMapping(value = "/gracefulShutdown", method = RequestMethod.GET)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public void gracefulShutDown()
-	{
-		try {
-			Thread.sleep(50000);
-			System.out.print("Hi I am in graceful shutdown");
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 }
