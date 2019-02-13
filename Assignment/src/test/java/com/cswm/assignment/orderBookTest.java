@@ -401,17 +401,5 @@ public class orderBookTest extends AbstractTest {
 	}
 	
 
-	@Test
-	public void getGraceFul() throws Exception {
-		String uri = "/gracefulShutdown";
-		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON)).andReturn();
-		int status = mvcResult.getResponse().getStatus();
-		String content = mvcResult.getResponse().getContentAsString();
-		OrderStatisticsOutputDto orderStatisticsDto = mapFromJson(content, OrderStatisticsOutputDto.class);
-		assertEquals(200, status);
-		assertEquals(40l, orderStatisticsDto.getExecutionPrice().longValue());
-
-	}
-	
 	
 }

@@ -11,6 +11,8 @@ import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 
+import com.cswm.assignment.ApplicationConstants;
+
 public class CustomGracefulShutdown implements TomcatConnectorCustomizer, ApplicationListener<ContextClosedEvent> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CustomGracefulShutdown.class);
@@ -29,7 +31,7 @@ public class CustomGracefulShutdown implements TomcatConnectorCustomizer, Applic
 			try {
 				ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executor;
 				threadPoolExecutor.shutdown();
-				if (threadPoolExecutor.getActiveCount() > 0 && !threadPoolExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+				if (threadPoolExecutor.getActiveCount() > 0 && !threadPoolExecutor.awaitTermination(ApplicationConstants.GRACEFUL_SHUTDOWN_WINDOW, TimeUnit.SECONDS)) {
 					logger.warn("Tomcat executor threadpool unable to complete the task within 30 seconds. Proceeding with forceful shutdown");
 				}
 			} catch (InterruptedException ex) {
