@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
+import com.cswm.assignment.model.dto.ouputDto.ClosedOrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
@@ -33,7 +34,7 @@ public interface OrderBookService {
 	 * @param orderBookId
 	 * @return updated order book object after closing
 	 */
-	OrderBookOutputDto closeOrderBook(Long orderBookId);
+	ClosedOrderBookOutputDto closeOrderBook(Long orderBookId);
 
 	/**
 	 * add execution to the order.

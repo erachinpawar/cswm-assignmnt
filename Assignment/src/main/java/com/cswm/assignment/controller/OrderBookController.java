@@ -16,6 +16,7 @@ import com.cswm.assignment.UrlConstants;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
+import com.cswm.assignment.model.dto.ouputDto.ClosedOrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
@@ -101,7 +102,7 @@ public class OrderBookController {
 	@RequestMapping(value = UrlConstants.URL_CLOSE_ORDER_BOOK, method = RequestMethod.PUT)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public @ResponseBody OrderBookOutputDto closeOrderBook(@PathVariable Long orderBookId) {
+	public @ResponseBody ClosedOrderBookOutputDto closeOrderBook(@PathVariable Long orderBookId) {
 		return orderBookService.closeOrderBook(orderBookId);
 	}
 
@@ -120,5 +121,6 @@ public class OrderBookController {
 		return orderBookService.addExecutionToBook(orderBookId, executionInputDto);
 
 	}
+	
 	
 }

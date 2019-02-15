@@ -38,6 +38,7 @@ import com.cswm.assignment.model.dto.OrderDetailsBo;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
+import com.cswm.assignment.model.dto.ouputDto.ClosedOrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
@@ -162,7 +163,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 	 * com.cswm.assignment.service.OrderBookService#closeOrderBook(java.lang.Long)
 	 */
 	@Override
-	public synchronized OrderBookOutputDto closeOrderBook(Long orderBookId) {
+	public synchronized ClosedOrderBookOutputDto closeOrderBook(Long orderBookId) {
 		logger.info("closeOrderBook() Method called with argument :: (" + orderBookId + ");");
 		OrderBook orderBook = new ModelMapper().map(getOrderBook(orderBookId), OrderBook.class);
 		if (!OrderBookStatus.OPEN.equals(orderBook.getOrderBookStatus()))
@@ -170,7 +171,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 		orderBook.setOrderBookStatus(OrderBookStatus.CLOSED);
 		orderBookRepository.updateOrderBookStatus(orderBookId, OrderBookStatus.CLOSED);
 		logger.info("closeOrderBook() Method returned value  :: " + orderBook.toString());
-		return new ModelMapper().map(orderBook, OrderBookOutputDto.class);
+		return new ModelMapper().map(orderBook, ClosedOrderBookOutputDto.class);
 	}
 
 	/*
@@ -217,6 +218,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 		orderService.addExecutionQuantityToOrders(validOrders, totalDemand, effectiveQtyForCurrentExec);
 		Execution execution = new ModelMapper().map(executionDto, Execution.class);
 		logger.info("addExecutionToBook() Method :: Final Execution getting saved as " + execution);
+		orderBook.getExecutions().add(execution);
 		executionRepository.save(execution);
 		if ((totalExecutions + executionDto.getQuantity()) >= totalDemand) {
 			logger.info("addExecutionToBook() Method :: execution executed partially as the effectice quantity for execution = " + (totalDemand - totalExecutions)

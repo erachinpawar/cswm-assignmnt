@@ -26,6 +26,7 @@ public class CustomGracefulShutdown implements TomcatConnectorCustomizer, Applic
 
 	@Override
 	public void onApplicationEvent(ContextClosedEvent event) {
+		logger.warn("Application is shutting down gracefully..");
 		Executor executor = this.connector.getProtocolHandler().getExecutor();
 		if (executor instanceof ThreadPoolExecutor) {
 			try {
