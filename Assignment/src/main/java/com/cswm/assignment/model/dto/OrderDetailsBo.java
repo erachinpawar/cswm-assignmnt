@@ -40,7 +40,7 @@ public class OrderDetailsBo {
 	public void setExecutionQuantity(Long executionQuantity) {
 		this.executionQuantity = executionQuantity;
 	}
-
+	
 	public void setOrderStatus(OrderStatus orderStatus) {
 		this.orderStatus = orderStatus;
 	}

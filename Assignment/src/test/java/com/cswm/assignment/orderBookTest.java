@@ -45,7 +45,7 @@ public class orderBookTest extends AbstractTest {
 		OrderBookOutputDto createdOrderBook = mapFromJson(content, OrderBookOutputDto.class);
 		assertEquals(200, status);
 		assertNotEquals(null, createdOrderBook.getOrderBookId());
-		assertNotEquals(null, createdOrderBook.getInstrumentId());
+		assertNotEquals(null, createdOrderBook.getInstrument().getInstrumentId());
 	}
 
 	@Test
@@ -91,9 +91,10 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderOutputDto addedOrderDto = mapFromJson(content, OrderOutputDto.class);
 		assertEquals(200, status);
-		assertEquals(2l, addedOrderDto.getInstrumentId().longValue());
-		assertEquals(OrderType.LIMIT_ORDER, addedOrderDto.getOrderType());
-		assertEquals(OrderStatus.VALID, addedOrderDto.getOrderStatus());
+		assertNotEquals(null, addedOrderDto.getInstrument());
+		assertEquals(2l, addedOrderDto.getInstrument().getInstrumentId().longValue());
+		assertEquals(OrderType.LIMIT_ORDER, addedOrderDto.getOrderDetails().getOrderType());
+		assertEquals(OrderStatus.VALID, addedOrderDto.getOrderDetails().getOrderStatus());
 	}
 
 	@Test
@@ -109,9 +110,10 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderOutputDto addedOrderDto = mapFromJson(content, OrderOutputDto.class);
 		assertEquals(200, status);
-		assertEquals(2l, addedOrderDto.getInstrumentId().longValue());
-		assertEquals(OrderType.MARKET_ORDER, addedOrderDto.getOrderType());
-		assertEquals(OrderStatus.VALID, addedOrderDto.getOrderStatus());
+		assertNotEquals(null, addedOrderDto.getInstrument());
+		assertEquals(2l, addedOrderDto.getInstrument().getInstrumentId().longValue());
+		assertEquals(OrderType.MARKET_ORDER, addedOrderDto.getOrderDetails().getOrderType());
+		assertEquals(OrderStatus.VALID, addedOrderDto.getOrderDetails().getOrderStatus());
 	}
 
 	@Test
@@ -222,20 +224,20 @@ public class orderBookTest extends AbstractTest {
 		OrderBookOutputDto orderBookDto = mapFromJson(content, OrderBookOutputDto.class);
 		orderBookDto.getOrders().forEach(order -> {
 			if (order.getOrderId().longValue() == 6l) {
-				assertEquals(OrderStatus.VALID, order.getOrderStatus());
-				assertEquals(27l, order.getExecutionQuantity().longValue());
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(27l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
 			if (order.getOrderId().longValue() == 5l) {
-				assertEquals(OrderStatus.VALID, order.getOrderStatus());
-				assertEquals(14l, order.getExecutionQuantity().longValue());
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(14l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
 			if (order.getOrderId().longValue() == 7l) {
-				assertEquals(OrderStatus.VALID, order.getOrderStatus());
-				assertEquals(9l, order.getExecutionQuantity().longValue());
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(9l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
 			if (order.getOrderId().longValue() == 4l) {
-				assertEquals(OrderStatus.INVALID, order.getOrderStatus());
-				assertEquals(0l, order.getExecutionQuantity().longValue());
+				assertEquals(OrderStatus.INVALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(0l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
 		});
 		assertEquals(200, status);
@@ -314,20 +316,20 @@ public class orderBookTest extends AbstractTest {
 		OrderBookOutputDto orderBookDto = mapFromJson(content, OrderBookOutputDto.class);
 		orderBookDto.getOrders().forEach(order -> {
 			if (order.getOrderId().longValue() == 4l) {
-				assertEquals(OrderStatus.INVALID, order.getOrderStatus());
-				assertEquals(0l, order.getExecutionQuantity().longValue());
+				assertEquals(OrderStatus.INVALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(0l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
 			if (order.getOrderId().longValue() == 5l) {
-				assertEquals(OrderStatus.VALID, order.getOrderStatus());
-				assertEquals(50l, order.getExecutionQuantity().longValue());
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(50l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
 			if (order.getOrderId().longValue() == 6l) {
-				assertEquals(OrderStatus.VALID, order.getOrderStatus());
-				assertEquals(100l, order.getExecutionQuantity().longValue());
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(100l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
 			if (order.getOrderId().longValue() == 7l) {
-				assertEquals(OrderStatus.VALID, order.getOrderStatus());
-				assertEquals(30l, order.getExecutionQuantity().longValue());
+				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
+				assertEquals(30l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
 
 		});

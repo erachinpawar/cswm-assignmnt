@@ -2,28 +2,22 @@ package com.cswm.assignment.model.dto.ouputDto;
 
 import java.math.BigDecimal;
 
-import com.cswm.assignment.applicationutils.OrderStatus;
-import com.cswm.assignment.applicationutils.OrderType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 public class OrderOutputDto {
 
 	private Long orderId;
 
-	private Long instrumentId;
+	private InstrumentOutputDto instrument;
 
 	@JsonBackReference
 	private OrderBookOutputDto orderBook;
 
+	private OrderDetailsOutputDto orderDetails;
+
 	private Long orderQuantity;
 
 	private BigDecimal orderprice;
-
-	private OrderStatus orderStatus;
-
-	private OrderType orderType;
-
-	private Long executionQuantity;
 
 	public OrderOutputDto() {
 	}
@@ -36,12 +30,12 @@ public class OrderOutputDto {
 		this.orderId = orderId;
 	}
 
-	public Long getInstrumentId() {
-		return instrumentId;
+	public InstrumentOutputDto getInstrument() {
+		return instrument;
 	}
 
-	public void setInstrumentId(Long instrumentId) {
-		this.instrumentId = instrumentId;
+	public void setInstrument(InstrumentOutputDto instrument) {
+		this.instrument = instrument;
 	}
 
 	public OrderBookOutputDto getOrderBook() {
@@ -50,6 +44,14 @@ public class OrderOutputDto {
 
 	public void setOrderBook(OrderBookOutputDto orderBook) {
 		this.orderBook = orderBook;
+	}
+
+	public OrderDetailsOutputDto getOrderDetails() {
+		return orderDetails;
+	}
+
+	public void setOrderDetails(OrderDetailsOutputDto orderDetails) {
+		this.orderDetails = orderDetails;
 	}
 
 	public Long getOrderQuantity() {
@@ -68,28 +70,10 @@ public class OrderOutputDto {
 		this.orderprice = orderprice;
 	}
 
-	public OrderStatus getOrderStatus() {
-		return orderStatus;
-	}
-
-	public void setOrderStatus(OrderStatus orderStatus) {
-		this.orderStatus = orderStatus;
-	}
-
-	public OrderType getOrderType() {
-		return orderType;
-	}
-
-	public void setOrderType(OrderType orderType) {
-		this.orderType = orderType;
-	}
-
-	public Long getExecutionQuantity() {
-		return executionQuantity;
-	}
-
-	public void setExecutionQuantity(Long executionQuantity) {
-		this.executionQuantity = executionQuantity;
+	@Override
+	public String toString() {
+		return "Order [orderId=" + orderId + ", instrument=" + instrument + ",  orderDetails=" + orderDetails
+				+ ", orderQuantity=" + orderQuantity + ", orderprice=" + orderprice + "]";
 	}
 
 }

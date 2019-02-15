@@ -8,15 +8,13 @@ public class OrderBookOutputDto {
 
 	private Long orderBookId;
 
-	private Long instrumentId;
+	private InstrumentOutputDto instrument;
 
 	private OrderBookStatus orderBookStatus;
 
 	private Set<ExecutionOutputDto> executions;
 
 	private Set<OrderOutputDto> orders;
-	
-	public OrderBookOutputDto() {}
 
 	public Long getOrderBookId() {
 		return orderBookId;
@@ -26,12 +24,12 @@ public class OrderBookOutputDto {
 		this.orderBookId = orderBookId;
 	}
 
-	public Long getInstrumentId() {
-		return instrumentId;
+	public InstrumentOutputDto getInstrument() {
+		return instrument;
 	}
 
-	public void setInstrumentId(Long instrumentId) {
-		this.instrumentId = instrumentId;
+	public void setInstrument(InstrumentOutputDto instrument) {
+		this.instrument = instrument;
 	}
 
 	public OrderBookStatus getOrderBookStatus() {
@@ -57,5 +55,7 @@ public class OrderBookOutputDto {
 	public void setOrders(Set<OrderOutputDto> orders) {
 		this.orders = orders;
 	}
+
+
 
 }
