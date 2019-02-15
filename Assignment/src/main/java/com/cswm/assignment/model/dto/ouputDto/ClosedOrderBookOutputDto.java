@@ -6,7 +6,7 @@ public class ClosedOrderBookOutputDto {
 
 	private Long orderBookId;
 
-	private InstrumentOutputDto instrument;
+	private Long instrumentId;
 
 	private OrderBookStatus orderBookStatus;
 
@@ -18,12 +18,12 @@ public class ClosedOrderBookOutputDto {
 		this.orderBookId = orderBookId;
 	}
 
-	public InstrumentOutputDto getInstrument() {
-		return instrument;
+	public Long getInstrumentId() {
+		return instrumentId;
 	}
 
-	public void setInstrument(InstrumentOutputDto instrument) {
-		this.instrument = instrument;
+	public void setInstrumentId(Long instrumentId) {
+		this.instrumentId = instrumentId;
 	}
 
 	public OrderBookStatus getOrderBookStatus() {

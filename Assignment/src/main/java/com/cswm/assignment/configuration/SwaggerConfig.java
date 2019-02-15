@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.cswm.assignment.ApplicationConstants;
+import com.google.common.base.Predicates;
 
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -20,7 +21,7 @@ public class SwaggerConfig {
     public Docket api() { 
         return new Docket(DocumentationType.SWAGGER_2) 
           .apiInfo(apiInfo())
-          .select()                                  
+          .select()   
           .apis(RequestHandlerSelectors.basePackage("com.cswm.assignment.controller"))              
           .paths(PathSelectors.any())                       
           .build();    
