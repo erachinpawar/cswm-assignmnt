@@ -21,6 +21,7 @@ import com.cswm.assignment.model.Message;
 import com.cswm.assignment.model.dto.inputDto.AddOrderInputDto;
 import com.cswm.assignment.model.dto.inputDto.ExecutionInputDto;
 import com.cswm.assignment.model.dto.inputDto.OrderBookInputDto;
+import com.cswm.assignment.model.dto.ouputDto.ClosedOrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderBookStatisticsOutputDto;
 import com.cswm.assignment.model.dto.ouputDto.OrderOutputDto;
@@ -192,7 +193,7 @@ public class orderBookTest extends AbstractTest {
 		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.put(uri).contentType(MediaType.APPLICATION_JSON)).andReturn();
 		int status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
-		OrderBookOutputDto orderBookDto = mapFromJson(content, OrderBookOutputDto.class);
+		ClosedOrderBookOutputDto orderBookDto = mapFromJson(content, ClosedOrderBookOutputDto.class);
 		assertEquals(200, status);
 		assertEquals(OrderBookStatus.CLOSED, orderBookDto.getOrderBookStatus());
 	}

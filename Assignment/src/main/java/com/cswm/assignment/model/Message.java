@@ -46,9 +46,4 @@ public class Message {
 		this.created = created;
 	}
 
-	@Override
-	public String toString() {
-		return "Message [errorCode=" + errorCode + ", message=" + message + ", created=" + created + "]";
-	}
-
 }

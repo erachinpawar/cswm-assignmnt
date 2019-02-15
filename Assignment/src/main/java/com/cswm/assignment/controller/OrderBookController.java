@@ -30,9 +30,9 @@ import io.swagger.annotations.ApiOperation;
 public class OrderBookController {
 
 	@Autowired
-	OrderBookService orderBookService;
+	private OrderBookService orderBookService;
 	@Autowired
-	OrderService orderService;
+	private OrderService orderService;
 
 	/**
 	 * Used to get statistics of the order book URI :
