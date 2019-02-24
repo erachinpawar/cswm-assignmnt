@@ -328,7 +328,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 		for (Order order : orders) {
 			if (order.getOrderDetails().getOrderType().equals(OrderType.MARKET_ORDER))
 				validOrders.add(order);
-			else if ((executionPrice.compareTo(null == order.getOrderprice() ? BigDecimal.ZERO : order.getOrderprice()) == -1 && order.getOrderDetails().getOrderType() == OrderType.LIMIT_ORDER))
+			else if ((executionPrice.compareTo(null == order.getOrderprice() ? BigDecimal.ZERO : order.getOrderprice()) <= 0 && order.getOrderDetails().getOrderType() == OrderType.LIMIT_ORDER))
 				validOrders.add(order);
 			else {
 				order.getOrderDetails().setOrderStatus(OrderStatus.INVALID);
