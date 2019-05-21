@@ -7,7 +7,6 @@ import com.cswm.assignment.model.Instrument;
 import com.cswm.assignment.model.Order;
 import com.cswm.assignment.model.OrderBook;
 import com.cswm.assignment.model.OrderDetails;
-import com.cswm.assignment.model.dto.OrderBookBo;
 import com.cswm.assignment.model.dto.OrderBo;
 
 public class CustomModelMapper {
@@ -26,21 +25,4 @@ public class CustomModelMapper {
 		return modelMapper;
 	}
 	
-	public static ModelMapper getOrderBookModelMapper() {
-		ModelMapper modelMapper = new ModelMapper();
-		modelMapper.createTypeMap(OrderBookBo.class, OrderBook.class).setProvider(new Provider<OrderBook>() {
-			public OrderBook get(ProvisionRequest<OrderBook> request) {
-				OrderBookBo s = OrderBookBo.class.cast(request.getSource());
-				OrderBook orderBook = new OrderBook();
-				orderBook.setCreatedBy(s.getCreatedBy());
-				orderBook.setCreatedOn(s.getCreatedOn());
-				orderBook.setInstrument(new ModelMapper().map(s.getInstrument(), Instrument.class));
-				orderBook.setOrderBookId(s.getOrderBookId());
-				orderBook.setOrderBookStatus(s.getOrderBookStatus());
-				return orderBook;
-			}
-		});
-		return modelMapper;
-	}
-
 }

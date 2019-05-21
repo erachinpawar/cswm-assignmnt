@@ -223,19 +223,19 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookOutputDto orderBookDto = mapFromJson(content, OrderBookOutputDto.class);
 		orderBookDto.getOrders().forEach(order -> {
-			if (order.getOrderId().longValue() == 6l) {
+			if (order.getOrderId().longValue() == 2006l) {
 				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
-				assertEquals(27l, order.getOrderDetails().getExecutionQuantity().longValue());
+				assertEquals(21l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
-			if (order.getOrderId().longValue() == 5l) {
+			if (order.getOrderId().longValue() == 2005l) {
 				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
-				assertEquals(14l, order.getOrderDetails().getExecutionQuantity().longValue());
+				assertEquals(11l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
-			if (order.getOrderId().longValue() == 7l) {
+			if (order.getOrderId().longValue() == 2007l) {
 				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
-				assertEquals(9l, order.getOrderDetails().getExecutionQuantity().longValue());
+				assertEquals(7l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
-			if (order.getOrderId().longValue() == 4l) {
+			if (order.getOrderId().longValue() == 2004l) {
 				assertEquals(OrderStatus.INVALID, order.getOrderDetails().getOrderStatus());
 				assertEquals(0l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
@@ -315,19 +315,19 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookOutputDto orderBookDto = mapFromJson(content, OrderBookOutputDto.class);
 		orderBookDto.getOrders().forEach(order -> {
-			if (order.getOrderId().longValue() == 4l) {
+			if (order.getOrderId().longValue() == 2004l) {
 				assertEquals(OrderStatus.INVALID, order.getOrderDetails().getOrderStatus());
 				assertEquals(0l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
-			if (order.getOrderId().longValue() == 5l) {
+			if (order.getOrderId().longValue() == 2005l) {
 				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
 				assertEquals(50l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
-			if (order.getOrderId().longValue() == 6l) {
+			if (order.getOrderId().longValue() == 2006l) {
 				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
 				assertEquals(100l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
-			if (order.getOrderId().longValue() == 7l) {
+			if (order.getOrderId().longValue() == 2007l) {
 				assertEquals(OrderStatus.VALID, order.getOrderDetails().getOrderStatus());
 				assertEquals(30l, order.getOrderDetails().getExecutionQuantity().longValue());
 			}
@@ -360,17 +360,17 @@ public class orderBookTest extends AbstractTest {
 		String content = mvcResult.getResponse().getContentAsString();
 		OrderBookStatisticsOutputDto orderBookStatisticsDto = mapFromJson(content, OrderBookStatisticsOutputDto.class);
 		assertEquals(200, status);
-		assertEquals(4l, orderBookStatisticsDto.getTotalOrderCount().longValue());
-		assertEquals(3l, orderBookStatisticsDto.getValidOrderCount().longValue());
-		assertEquals(1l, orderBookStatisticsDto.getInValidOrderCount().longValue());
-		assertEquals(200l, orderBookStatisticsDto.getTotalDemand().longValue());
-		assertEquals(20l, orderBookStatisticsDto.getInValidDemand().longValue());
-		assertEquals(180l, orderBookStatisticsDto.getValidDemand().longValue());
+		assertEquals(6l, orderBookStatisticsDto.getTotalOrderCount().longValue());
+		assertEquals(4l, orderBookStatisticsDto.getValidOrderCount().longValue());
+		assertEquals(2l, orderBookStatisticsDto.getInValidOrderCount().longValue());
+		assertEquals(260l, orderBookStatisticsDto.getTotalDemand().longValue());
+		assertEquals(30l, orderBookStatisticsDto.getInValidDemand().longValue());
+		assertEquals(230l, orderBookStatisticsDto.getValidDemand().longValue());
 		assertEquals(2007l, orderBookStatisticsDto.getLastOrder().getOrderId().longValue());
 		assertEquals(2006l, orderBookStatisticsDto.getBiggestOrder().getOrderId().longValue());
-		assertEquals(2004l, orderBookStatisticsDto.getSmallestOrder().getOrderId().longValue());
+		assertEquals(2008l, orderBookStatisticsDto.getSmallestOrder().getOrderId().longValue());
 		assertEquals(2004l, orderBookStatisticsDto.getEarliestOrder().getOrderId().longValue());
-		assertEquals(180l, orderBookStatisticsDto.getAccumulatedExecutionQuantity().longValue());
+		assertEquals(230l, orderBookStatisticsDto.getAccumulatedExecutionQuantity().longValue());
 		assertEquals(0, BigDecimal.valueOf(40l).compareTo(orderBookStatisticsDto.getExecutionPrice()));
 		assertEquals(2, orderBookStatisticsDto.getLimitBreakDownForAllOrders().size());
 		assertEquals(1, orderBookStatisticsDto.getLimitBreakDownForInvalidOrders().size());

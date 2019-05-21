@@ -91,11 +91,5 @@ public class OrderBo {
 		this.createdOn = createdOn;
 	}
 
-	@Override
-	public String toString() {
-		return "Order [orderId=" + orderId + ", instrument=" + instrument + ",  orderDetails=" + orderDetails
-				+ ", orderQuantity=" + orderQuantity + ", orderprice=" + orderprice + ", createdBy=" + createdBy
-				+ ", createdOn=" + createdOn + "]";
-	}
 
 }

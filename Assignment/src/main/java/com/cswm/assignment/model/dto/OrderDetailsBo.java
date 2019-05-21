@@ -45,10 +45,5 @@ public class OrderDetailsBo {
 		this.orderStatus = orderStatus;
 	}
 
-	@Override
-	public String toString() {
-		return "OrderDetails [orderDetailsId=" + orderDetailsId + ", orderStatus=" + orderStatus + ", orderType="
-				+ orderType + ", executionQuantity=" + executionQuantity + "]";
-	}
 
 }

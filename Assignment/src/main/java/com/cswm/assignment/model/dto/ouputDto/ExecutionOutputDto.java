@@ -42,9 +42,9 @@ public class ExecutionOutputDto {
 		this.quantity = quantity;
 	}
 
-	public OrderBookOutputDto getOrderBook() {
-		return orderBook;
-	}
+//	public OrderBookOutputDto getOrderBook() {
+//		return orderBook;
+//	}
 
 	public void setOrderBook(OrderBookOutputDto orderBook) {
 		this.orderBook = orderBook;

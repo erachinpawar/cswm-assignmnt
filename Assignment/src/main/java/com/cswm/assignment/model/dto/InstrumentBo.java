@@ -37,10 +37,5 @@ public class InstrumentBo {
 		this.createdOn = createdOn;
 	}
 
-	@Override
-	public String toString() {
-		return "Instrument [instrumentId=" + instrumentId + ", createdBy=" + createdBy + ", createdOn=" + createdOn
-				+ "]";
-	}
 
 }

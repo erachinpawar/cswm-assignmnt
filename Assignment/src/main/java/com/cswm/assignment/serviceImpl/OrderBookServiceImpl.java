@@ -228,7 +228,7 @@ public class OrderBookServiceImpl implements OrderBookService {
 		}
 		orderBook = getOrderBook(orderBookId);
 		logger.info("addExecutionToBook() Method returned value  :: " + orderBook.toString());
-		return CustomModelMapper.getOrderBookModelMapper().map(orderBook, OrderBookOutputDto.class);
+		return new ModelMapper().map(orderBook, OrderBookOutputDto.class);
 	}
 
 	/*

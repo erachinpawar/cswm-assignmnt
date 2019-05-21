@@ -38,9 +38,9 @@ public class OrderOutputDto {
 		this.instrument = instrument;
 	}
 
-	public OrderBookOutputDto getOrderBook() {
-		return orderBook;
-	}
+//	public OrderBookOutputDto getOrderBook() {
+//		return orderBook;
+//	}
 
 	public void setOrderBook(OrderBookOutputDto orderBook) {
 		this.orderBook = orderBook;
